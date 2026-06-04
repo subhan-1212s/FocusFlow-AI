@@ -1,13 +1,18 @@
 {
   "manifest_version": 3,
-  "name": "Productivity Flow Tracker",
+  "name": "FocusFlow AI",
   "version": "1.0",
-  "description": "Monitor time, block distractions, and boost productivity.",
+  "description": "AI-powered productivity extension: block distractions, summarize pages, capture notes, and track tasks.",
   "permissions": [
     "tabs",
+    "activeTab",
     "storage",
     "declarativeNetRequest",
-    "alarms"
+    "declarativeNetRequestFeedback",
+    "alarms",
+    "notifications",
+    "contextMenus",
+    "scripting"
   ],
   "host_permissions": [
     "http://localhost:5000/*",
@@ -25,5 +30,26 @@
       "enabled": true,
       "path": "rules.json"
     }]
-  }
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_end"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "sidebar/sidebar.html",
+        "sidebar/sidebar.css",
+        "sidebar/sidebar.js",
+        "blocked/blocked.html",
+        "blocked/blocked.css",
+        "blocked/blocked.js"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }

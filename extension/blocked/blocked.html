@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="blocked.css">
+  <title>FocusFlow AI • Calming Flow</title>
+</head>
+<body>
+  <div class="stars"></div>
+  <div class="grid-overlay"></div>
+  
+  <div class="container">
+    <header>
+      <div class="logo">
+        <span class="logo-dot"></span>
+        <h2>FocusFlow <span>AI</span></h2>
+      </div>
+      <div class="badge">Focus Mode Activated</div>
+    </header>
+
+    <main>
+      <div class="breathing-widget">
+        <div class="breathing-circle-outer">
+          <div class="breathing-circle-inner animate-breath"></div>
+        </div>
+        <div class="breathing-label" id="breathing-text">Inhale...</div>
+      </div>
+
+      <div class="message-card">
+        <h1>Stay in the Flow</h1>
+        <p class="quote" id="quote-display">"Simplicity is the ultimate sophistication."</p>
+        <p class="author" id="author-display">— Leonardo da Vinci</p>
+      </div>
+
+      <div class="timer-widget">
+        <span class="timer-label" id="timer-phase">FOCUS SESSION TIMEOUT</span>
+        <div class="timer-value" id="timer-display">25:00</div>
+      </div>
+
+      <div class="actions">
+        <button id="disable-focus-btn" class="btn secondary">Disable Focus Mode</button>
+        <button id="go-back-btn" class="btn primary">Back to Workspace</button>
+      </div>
+    </main>
+
+    <footer>
+      <p>Take three deep breaths. Let go of distractions. Focus on what truly matters.</p>
+    </footer>
+  </div>
+  <script src="blocked.js"></script>
+</body>
+</html>

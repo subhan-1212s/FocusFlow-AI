@@ -3,7 +3,14 @@ let activeStartTime = null;
 let activeDomain = null;
 
 const API_URL = 'http://localhost:5000/api';
-const USER_ID = 'user_demo@example.com'; // Placeholder user ID
+const USER_ID = 'user_demo@example.com';
+
+// Pomodoro Timer State
+let pomoTimeLeft = 25 * 60; // 25 minutes default
+let pomoIsRunning = false;
+let pomoPhase = 'work'; // 'work' | 'break'
+let pomoSessionCount = 1;
+let pomoInterval = null;
 
 // Track tab activation
 chrome.tabs.onActivated.addListener(async (activeInfo) => {
@@ -15,8 +22,12 @@ chrome.windows.onFocusChanged.addListener(async (windowId) => {
   if (windowId === chrome.windows.WINDOW_ID_NONE) {
     await stopTracking();
   } else {
-    const [tab] = await chrome.tabs.query({ active: true, windowId });
-    if (tab) await handleTabChange(tab.id);
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, windowId });
+      if (tab) await handleTabChange(tab.id);
+    } catch (e) {
+      console.error(e);
+    }
   }
 });
 
@@ -33,7 +44,7 @@ async function handleTabChange(tabId) {
       console.log(`Started tracking: ${domain}`);
     }
   } catch (e) {
-    console.error(e);
+    // Avoid console spamming on developer panel or internal chrome:// urls
   }
 }
 
@@ -49,7 +60,6 @@ async function stopTracking() {
         duration: duration
       };
       
-      // Save locally or sync immediately
       syncActivity(activity);
     }
   }
@@ -71,40 +81,267 @@ async function syncActivity(activity) {
   }
 }
 
-// Update blocking rules based on user preferences
-chrome.alarms.create('syncPreferences', { periodInMinutes: 5 });
+// Declarative Net Request Dynamic Blocking Rules
+async function updateBlockingRules() {
+  try {
+    const response = await fetch(`${API_URL}/preferences/${USER_ID}`);
+    const data = await response.json();
+    const blockedSites = data.blockedSites || [];
+    const focusMode = data.focusMode || false;
+    
+    const oldRules = await chrome.declarativeNetRequest.getDynamicRules();
+    const oldRuleIds = oldRules.map(r => r.id);
+
+    // If focus mode is active, set up redirection rules
+    if (focusMode && blockedSites.length > 0) {
+      const rules = blockedSites.map((site, index) => ({
+        id: index + 1,
+        priority: 1,
+        action: { 
+          type: 'redirect', 
+          redirect: { extensionPath: '/blocked/blocked.html' } 
+        },
+        condition: { 
+          urlFilter: `*://${site}/*`, 
+          resourceTypes: ['main_frame'] 
+        }
+      }));
+
+      await chrome.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds: oldRuleIds,
+        addRules: rules
+      });
+      console.log('Focus Mode Active: Blocking rules updated with redirection');
+    } else {
+      // Clear rules when Focus Mode is OFF
+      await chrome.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds: oldRuleIds,
+        addRules: []
+      });
+      console.log('Focus Mode Inactive: Blocking rules cleared');
+    }
+  } catch (e) {
+    console.error('Failed to update blocking rules:', e);
+  }
+}
+
+// Alarms to check for preference sync
+chrome.alarms.create('syncPreferences', { periodInMinutes: 2 });
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === 'syncPreferences') {
     updateBlockingRules();
   }
 });
 
-async function updateBlockingRules() {
-  try {
-    const response = await fetch(`${API_URL}/preferences/${USER_ID}`);
-    const data = await response.json();
-    const blockedSites = data.blockedSites || [];
-    
-    // Convert domains to DNR rules
-    const rules = blockedSites.map((site, index) => ({
-      id: index + 1,
-      priority: 1,
-      action: { type: 'block' },
-      condition: { urlFilter: `*://${site}/*`, resourceTypes: ['main_frame'] }
-    }));
+// Context Menus for Selection Highlighting
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.contextMenus.create({
+    id: 'save-to-focusflow',
+    title: 'Save selection to FocusFlow Notes',
+    contexts: ['selection']
+  });
+  
+  // Set initial empty dynamic rules
+  chrome.declarativeNetRequest.updateDynamicRules({
+    removeRuleIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+    addRules: []
+  });
+  
+  // Sync on startup
+  updateBlockingRules();
+});
 
-    const oldRules = await chrome.declarativeNetRequest.getDynamicRules();
-    const oldRuleIds = oldRules.map(r => r.id);
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+  if (info.menuItemId === 'save-to-focusflow' && info.selectionText) {
+    const note = {
+      userId: USER_ID,
+      url: tab.url,
+      domain: new URL(tab.url).hostname,
+      title: tab.title || 'Web Clipper Highlight',
+      content: info.selectionText,
+      tags: ['Clipped']
+    };
 
-    await chrome.declarativeNetRequest.updateDynamicRules({
-      removeRuleIds: oldRuleIds,
-      addRules: rules
-    });
-    console.log('Blocking rules updated');
-  } catch (e) {
-    console.error('Failed to update rules:', e);
+    try {
+      const response = await fetch(`${API_URL}/notes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(note)
+      });
+      
+      if (response.ok) {
+        chrome.notifications.create({
+          type: 'basic',
+          iconUrl: '/popup/icon-128.png', // Fallback or standard notification icon
+          title: 'Highlight Saved! 💡',
+          message: 'Saved to your FocusFlow Knowledge Hub.',
+          priority: 1
+        });
+      }
+    } catch (e) {
+      console.error('Failed to save context menu note:', e);
+    }
+  }
+});
+
+// Pomodoro Timer state management
+function startPomodoro() {
+  if (pomoIsRunning) return;
+  pomoIsRunning = true;
+  
+  pomoInterval = setInterval(() => {
+    if (pomoTimeLeft > 0) {
+      pomoTimeLeft--;
+    } else {
+      handlePomodoroCompletion();
+    }
+  }, 1000);
+}
+
+function pausePomodoro() {
+  pomoIsRunning = false;
+  if (pomoInterval) {
+    clearInterval(pomoInterval);
+    pomoInterval = null;
   }
 }
 
-// Initial update
+function resetPomodoro() {
+  pausePomodoro();
+  pomoPhase = 'work';
+  pomoTimeLeft = 25 * 60;
+}
+
+async function handlePomodoroCompletion() {
+  pausePomodoro();
+  
+  if (pomoPhase === 'work') {
+    // Increment focus metric in DB (add a mock activity or increment local stats)
+    // Add completed Pomodoro cycle to local storage blocked counter / focus tracking
+    chrome.storage.local.get({ pomoCompleted: 0 }, (items) => {
+      chrome.storage.local.set({ pomoCompleted: items.pomoCompleted + 1 });
+    });
+    
+    // Trigger break session
+    pomoPhase = 'break';
+    pomoTimeLeft = 5 * 60; // 5 minutes break
+    
+    // Automation: Disable Focus Mode during Break!
+    await toggleFocusModeAPI(false);
+    
+    chrome.notifications.create({
+      type: 'basic',
+      iconUrl: 'popup/popup.html', // Chrome uses whatever page is accessible or standard paths
+      title: 'Focus Cycle Complete! ☕',
+      message: 'Great job! Take a 5-minute break. Focus mode is temporarily suspended.',
+      priority: 2
+    });
+  } else {
+    // Break finished, return to focus!
+    pomoPhase = 'work';
+    pomoTimeLeft = 25 * 60;
+    pomoSessionCount++;
+    
+    // Automation: Re-enable Focus Mode!
+    await toggleFocusModeAPI(true);
+
+    chrome.notifications.create({
+      type: 'basic',
+      title: 'Break Over! 🧠',
+      message: 'Time to focus. Focus mode has been reactivated. Let\'s make progress!',
+      priority: 2
+    });
+  }
+  
+  // Auto restart next phase
+  startPomodoro();
+}
+
+async function toggleFocusModeAPI(enable) {
+  try {
+    const prefResponse = await fetch(`${API_URL}/preferences/${USER_ID}`);
+    const pref = await prefResponse.json();
+    
+    await fetch(`${API_URL}/preferences`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: USER_ID,
+        focusMode: enable,
+        blockedSites: pref.blockedSites
+      })
+    });
+    
+    updateBlockingRules();
+  } catch (e) {
+    console.error('Failed to toggle focus mode via Pomodoro:', e);
+  }
+}
+
+// Listen to redirect hit to increment blocked attempts
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status === 'complete' && tab.url && tab.url.includes('/blocked/blocked.html')) {
+    chrome.storage.local.get({ blockedAttempts: 0 }, (items) => {
+      chrome.storage.local.set({ blockedAttempts: items.blockedAttempts + 1 });
+    });
+  }
+});
+
+// Runtime Message Handlers
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === 'GET_POMODORO_STATE') {
+    const minutes = Math.floor(pomoTimeLeft / 60);
+    const seconds = pomoTimeLeft % 60;
+    sendResponse({
+      minutes,
+      seconds,
+      isRunning: pomoIsRunning,
+      phase: pomoPhase,
+      sessionCount: pomoSessionCount
+    });
+  }
+  
+  else if (message.action === 'START_POMODORO') {
+    startPomodoro();
+    sendResponse({ success: true });
+  }
+  
+  else if (message.action === 'PAUSE_POMODORO') {
+    pausePomodoro();
+    sendResponse({ success: true });
+  }
+  
+  else if (message.action === 'RESET_POMODORO') {
+    resetPomodoro();
+    sendResponse({ success: true });
+  }
+  
+  else if (message.action === 'REFRESH_BLOCKING_RULES') {
+    updateBlockingRules();
+    sendResponse({ success: true });
+  }
+
+  else if (message.action === 'RESTORE_WORKSPACE') {
+    const tabs = message.tabs || [];
+    if (tabs.length > 0) {
+      chrome.windows.create({ focused: true }, (window) => {
+        tabs.forEach((t, i) => {
+          // Open in the newly created window, replace the default blank tab on first load
+          if (i === 0) {
+            chrome.tabs.update(window.tabs[0].id, { url: t.url });
+          } else {
+            chrome.tabs.create({ windowId: window.id, url: t.url });
+          }
+        });
+      });
+      sendResponse({ success: true });
+    } else {
+      sendResponse({ error: 'No tabs in session' });
+    }
+  }
+  
+  return true; // Keep message channel open for async responses
+});
+
+// Initial update rules on startup
 updateBlockingRules();

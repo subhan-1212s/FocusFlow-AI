@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="sidebar.css">
+  <title>FocusFlow AI Sidebar</title>
+</head>
+<body>
+  <div class="sidebar-wrapper">
+    <header>
+      <div class="logo">
+        <span class="logo-dot animate-glow"></span>
+        <h2>FocusFlow <span>AI</span></h2>
+      </div>
+      <button id="close-sidebar-btn" class="close-btn">
+        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </header>
+
+    <!-- Tab navigation -->
+    <nav class="tabs-nav">
+      <button class="tab-btn active" data-tab="ai-chat" title="AI Assistant">AI</button>
+      <button class="tab-btn" data-tab="ai-summary" title="Page Summaries">Insights</button>
+      <button class="tab-btn" data-tab="tasks" title="Tasks Manager">Tasks</button>
+      <button class="tab-btn" data-tab="notes" title="Notes & Clippings">Notes</button>
+      <button class="tab-btn" data-tab="pomo" id="pomo-tab-indicator" title="Pomodoro Timer">00:00</button>
+    </nav>
+
+    <!-- Tabs content -->
+    <main class="tabs-content">
+      
+      <!-- AI Chat Tab -->
+      <section id="ai-chat" class="tab-pane active">
+        <div class="chat-container">
+          <div class="chat-messages" id="chat-messages">
+            <div class="message system-msg">
+              <p>👋 Welcome! I am **FocusFlow AI**, your learning assistant. Ask me anything, or query coding topics, and I'll answer instantly!</p>
+            </div>
+          </div>
+          <form class="chat-input-area" id="chat-form">
+            <input type="text" id="chat-input" placeholder="Ask about this page or coding questions..." autocomplete="off">
+            <button type="submit" id="chat-send">
+              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- AI Summary Tab -->
+      <section id="ai-summary" class="tab-pane">
+        <div class="summary-container">
+          <div class="action-card">
+            <h3>Extract Web Intelligence</h3>
+            <p>Generate summaries, takeaways, and workflow insights instantly.</p>
+            <button id="summarize-page-btn" class="btn-primary-glow">Summarize Page</button>
+          </div>
+          <div class="summary-display markdown-body hidden" id="summary-display">
+            <!-- summary goes here -->
+          </div>
+          <div class="loader hidden" id="summary-loader">
+            <div class="spinner"></div>
+            <p>Synthesizing web content with Gemini...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tasks Tab -->
+      <section id="tasks" class="tab-pane">
+        <div class="tasks-container">
+          <div class="quick-add-task">
+            <input type="text" id="quick-task-input" placeholder="Add urgent task...">
+            <button id="quick-task-add-btn">
+              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
+          </div>
+          <div class="task-list-scroller" id="sidebar-task-list">
+            <!-- tasks go here -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Notes Tab -->
+      <section id="notes" class="tab-pane">
+        <div class="notes-container">
+          <h3 class="panel-subtitle" id="site-notes-header">Clipped from this website</h3>
+          <div class="notes-list-scroller" id="sidebar-notes-list">
+            <!-- notes go here -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Pomodoro Tab -->
+      <section id="pomo" class="tab-pane">
+        <div class="pomo-panel">
+          <div class="pomo-display">
+            <span class="pomo-state" id="sidebar-pomo-phase">POMODORO FOCUS</span>
+            <div class="pomo-time" id="sidebar-pomo-time">25:00</div>
+            <span class="pomo-count" id="sidebar-pomo-sessions">Session #1</span>
+          </div>
+          <div class="pomo-controls">
+            <button id="sidebar-pomo-start" class="pomo-btn main">Start</button>
+            <button id="sidebar-pomo-pause" class="pomo-btn main hidden">Pause</button>
+            <button id="sidebar-pomo-reset" class="pomo-btn sub">Reset</button>
+          </div>
+          <div class="pomo-tips">
+            <p>💡 <strong>Smart Feature</strong>: FocusFlow automatically blocks all social distractions during your focus intervals and unblocks them during breaks.</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+  <script src="sidebar.js"></script>
+</body>
+</html>
