@@ -161,11 +161,12 @@ async function handleChatSubmit(e) {
   }
 }
 
+let messageCounter = 0;
 function appendChatMessage(htmlContent, className) {
   const container = document.getElementById('chat-messages');
   const msgDiv = document.createElement('div');
   msgDiv.className = `message ${className}`;
-  const id = `msg-${Date.now()}`;
+  const id = `msg-${Date.now()}-${messageCounter++}`;
   msgDiv.id = id;
   msgDiv.innerHTML = className === 'user-msg' ? `<p>${escapeHtml(htmlContent)}</p>` : htmlContent;
   
