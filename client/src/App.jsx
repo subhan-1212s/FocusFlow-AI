@@ -67,7 +67,6 @@ const App = () => {
   const [noteSearch, setNoteSearch] = useState('');
   const [newBlockedSite, setNewBlockedSite] = useState('');
   const [newDailyGoal, setNewDailyGoal] = useState(480);
-  const [geminiKey, setGeminiKey] = useState('');
 
   // Sync state
   const [saveWorkspaceName, setSaveWorkspaceName] = useState('');
@@ -76,9 +75,6 @@ const App = () => {
     if (userId) {
       fetchData();
     }
-    // Load local storage Gemini key if present
-    const savedKey = localStorage.getItem('gemini_key') || '';
-    setGeminiKey(savedKey);
   }, [userId]);
 
   // Auth actions
@@ -290,12 +286,6 @@ const App = () => {
     } catch (err) {
       console.error(err);
     }
-  };
-
-  const handleSaveGeminiKey = (e) => {
-    e.preventDefault();
-    localStorage.setItem('gemini_key', geminiKey);
-    alert('Gemini API credentials saved in browser storage successfully!');
   };
 
   // Workspace restore
@@ -1097,29 +1087,7 @@ const App = () => {
                   </div>
                 </div>
 
-                {/* 5c. Gemini API Keys Credentials */}
-                <div className="glass-card settings-group">
-                  <div className="flex flex-col gap-1">
-                    <h3 className="text-base font-bold">Google Gemini AI Integrations</h3>
-                    <p className="text-xs text-slate-500">Provide your personal Gemini API key to unlock ultra-fast page summaries and chat assistants directly in host webs.</p>
-                  </div>
-                  <form onSubmit={handleSaveGeminiKey} className="flex flex-col gap-3">
-                    <div className="flex gap-3">
-                      <input 
-                        type="password" 
-                        className="input-field" 
-                        placeholder="Paste your Gemini AI Studio API Key..." 
-                        value={geminiKey}
-                        onChange={(e) => setGeminiKey(e.target.value)}
-                      />
-                      <button type="submit" className="btn btn-primary">Save API Key</button>
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-500 text-xs mt-1">
-                      <AlertCircle size={12} />
-                      <p>Your API key is saved strictly in your local browser cache and never sent to outside servers except Google Generative AI endpoints.</p>
-                    </div>
-                  </form>
-                </div>
+
 
               </div>
             )}

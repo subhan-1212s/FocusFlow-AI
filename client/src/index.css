@@ -131,9 +131,9 @@ body {
 
 .nav-item.active {
   color: white;
-  background: rgba(99, 102, 241, 0.15);
-  border: 1px solid rgba(99, 102, 241, 0.25);
-  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.08);
+  background: rgba(197, 168, 128, 0.12);
+  border: 1px solid rgba(197, 168, 128, 0.25);
+  box-shadow: 0 8px 24px rgba(197, 168, 128, 0.08);
 }
 
 .nav-footer {
@@ -457,7 +457,7 @@ body {
 
 .task-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(99, 102, 241, 0.3);
+  border-color: rgba(197, 168, 128, 0.3);
 }
 
 .task-main {
@@ -664,8 +664,8 @@ body {
   font-size: 0.72rem;
   font-weight: 600;
   color: var(--primary);
-  background: rgba(99, 102, 241, 0.08);
-  border: 1px solid rgba(99, 102, 241, 0.15);
+  background: rgba(197, 168, 128, 0.08);
+  border: 1px solid rgba(197, 168, 128, 0.15);
   padding: 3px 10px;
   border-radius: 8px;
 }
@@ -924,6 +924,19 @@ input:checked + .slider:before {
 }
 
 /* --- RESPONSIVE LAYOUTS --- */
+@media (max-width: 1024px) {
+  .main-content {
+    margin-left: 240px;
+    padding: 24px;
+    width: calc(100% - 240px);
+  }
+  
+  .sidebar-nav {
+    width: 240px;
+    padding: 24px 16px;
+  }
+}
+
 @media (max-width: 768px) {
   .dashboard-layout {
     flex-direction: column;
