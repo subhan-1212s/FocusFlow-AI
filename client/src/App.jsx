@@ -432,17 +432,15 @@ const App = () => {
     return (
       <div className="auth-layout min-h-screen flex items-center justify-center bg-slate-950 text-white relative">
         <div className="auth-overlay"></div>
-        <div className="absolute top-6 left-6 z-10">
-          <button onClick={() => navigate('/')} className="btn btn-secondary text-xs flex items-center gap-2">
-            ← Back to Home
-          </button>
-        </div>
         <motion.div 
           className="glass-card auth-card"
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
+          <button onClick={() => navigate('/')} className="btn-back-home">
+            ← Back to Home
+          </button>
           <div className="auth-header">
             <h2>FocusFlow <span>AI</span></h2>
             <p className="auth-subtitle">Elevate your cognitive workspace</p>

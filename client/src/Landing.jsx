@@ -69,14 +69,14 @@ const Landing = ({ onNavigate, isAuthenticated }) => {
             <a href="#features" className="landing-nav-link">Features</a>
             <a href="#install" className="landing-nav-link">Install Extension</a>
             <a href="#faq" className="landing-nav-link">FAQ</a>
-            <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="landing-nav-link flex-link">
+            <a href="https://github.com/subhan-1212s/Chrome-Extension" target="_blank" rel="noopener noreferrer" className="landing-nav-link flex-link">
               GitHub <ExternalLink size={12} />
             </a>
           </nav>
 
           <div className="landing-actions">
             <button 
-              onClick={() => onNavigate(isAuthenticated ? 'dashboard' : 'login')}
+              onClick={() => onNavigate(isAuthenticated ? '/dashboard' : '/login')}
               className="btn btn-primary"
             >
               {isAuthenticated ? 'Enter Workspace' : 'Launch Dashboard'}
@@ -107,13 +107,13 @@ const Landing = ({ onNavigate, isAuthenticated }) => {
                 <a href="#features" onClick={() => setMobileMenuOpen(false)} className="mobile-nav-link">Features</a>
                 <a href="#install" onClick={() => setMobileMenuOpen(false)} className="mobile-nav-link">Install Extension</a>
                 <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="mobile-nav-link">FAQ</a>
-                <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="mobile-nav-link flex-link">
+                <a href="https://github.com/subhan-1212s/Chrome-Extension" target="_blank" rel="noopener noreferrer" className="mobile-nav-link flex-link">
                   GitHub <ExternalLink size={12} />
                 </a>
                 <button 
                   onClick={() => {
                     setMobileMenuOpen(false);
-                    onNavigate(isAuthenticated ? 'dashboard' : 'login');
+                    onNavigate(isAuthenticated ? '/dashboard' : '/login');
                   }}
                   className="btn btn-primary w-full-btn"
                 >
@@ -127,16 +127,6 @@ const Landing = ({ onNavigate, isAuthenticated }) => {
 
       {/* Hero Section */}
       <section className="landing-hero">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="landing-badge"
-        >
-          <span className="landing-badge-dot" />
-          FocusFlow Chrome Extension V3 is Now Live
-        </motion.div>
-
         <motion.h1 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -169,7 +159,7 @@ const Landing = ({ onNavigate, isAuthenticated }) => {
             Install Extension
           </a>
           <button 
-            onClick={() => onNavigate(isAuthenticated ? 'dashboard' : 'login')}
+            onClick={() => onNavigate(isAuthenticated ? '/dashboard' : '/login')}
             className="btn btn-secondary py-3-5 px-8"
           >
             <Eye size={18} />
@@ -451,7 +441,7 @@ const Landing = ({ onNavigate, isAuthenticated }) => {
             Get started by adding the Chrome extension and initializing your statistics dashboard now.
           </p>
           <button 
-            onClick={() => onNavigate(isAuthenticated ? 'dashboard' : 'login')}
+            onClick={() => onNavigate(isAuthenticated ? '/dashboard' : '/login')}
             className="btn btn-primary py-4 px-10 text-base-bold"
           >
             Launch Free Workspace
@@ -470,7 +460,7 @@ const Landing = ({ onNavigate, isAuthenticated }) => {
           <div className="footer-links">
             <a href="#features" className="footer-link">Features</a>
             <a href="#install" className="footer-link">Install</a>
-            <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="footer-link">GitHub</a>
+            <a href="https://github.com/subhan-1212s/Chrome-Extension" target="_blank" rel="noopener noreferrer" className="footer-link">GitHub</a>
           </div>
         </div>
       </footer>
