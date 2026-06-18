@@ -10,6 +10,7 @@ import {
   AlertCircle, Menu, X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Landing from './Landing';
 
 let API_URL = import.meta.env.VITE_API_URL || 'https://chrome-extension-ts0n.onrender.com/api';
 if (API_URL && !API_URL.endsWith('/api') && !API_URL.endsWith('/api/')) {
@@ -40,6 +41,7 @@ const itemVariants = {
 };
 
 const App = () => {
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [userId, setUserId] = useState(localStorage.getItem('focusflow_user') || '');
   const [loading, setLoading] = useState(userId ? true : false);
@@ -71,6 +73,29 @@ const App = () => {
   // Sync state
   const [saveWorkspaceName, setSaveWorkspaceName] = useState('');
 
+  const navigate = (path) => {
+    window.history.pushState({}, '', path);
+    setCurrentPath(path);
+    setIsMobileMenuOpen(false);
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Handle redirects based on authentication
+  useEffect(() => {
+    if (userId && currentPath === '/login') {
+      navigate('/dashboard');
+    } else if (!userId && currentPath === '/dashboard') {
+      navigate('/login');
+    }
+  }, [userId, currentPath]);
+
   useEffect(() => {
     if (userId) {
       fetchData();
@@ -100,6 +125,7 @@ const App = () => {
         const loggedInEmail = res.data.email;
         localStorage.setItem('focusflow_user', loggedInEmail);
         setUserId(loggedInEmail);
+        navigate('/dashboard');
         
         // Sync with Chrome Extension if present
         if (window.chrome && window.chrome.runtime) {
@@ -124,6 +150,7 @@ const App = () => {
     setTasks([]);
     setNotes([]);
     setSessions([]);
+    navigate('/');
     if (window.chrome && window.chrome.runtime) {
       window.chrome.runtime.sendMessage({ 
         action: 'SYNC_USER', 
@@ -401,10 +428,15 @@ const App = () => {
     </div>
   );
 
-  if (!userId) {
+  if (currentPath === '/login') {
     return (
-      <div className="auth-layout min-h-screen flex items-center justify-center bg-slate-950 text-white">
+      <div className="auth-layout min-h-screen flex items-center justify-center bg-slate-950 text-white relative">
         <div className="auth-overlay"></div>
+        <div className="absolute top-6 left-6 z-10">
+          <button onClick={() => navigate('/')} className="btn btn-secondary text-xs flex items-center gap-2">
+            ← Back to Home
+          </button>
+        </div>
         <motion.div 
           className="glass-card auth-card"
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
@@ -480,8 +512,9 @@ const App = () => {
     );
   }
 
-  return (
-    <div className="dashboard-layout">
+  if (currentPath === '/dashboard') {
+    return (
+      <div className="dashboard-layout">
       {/* Mobile Backdrop Overlay */}
       {isMobileMenuOpen && (
         <div className="sidebar-overlay" onClick={() => setIsMobileMenuOpen(false)}></div>
@@ -1108,6 +1141,9 @@ const App = () => {
       </main>
     </div>
   );
+  }
+
+  return <Landing onNavigate={navigate} isAuthenticated={!!userId} />;
 };
 
 export default App;
