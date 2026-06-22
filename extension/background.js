@@ -7,6 +7,9 @@ let USER_ID = 'user_demo@example.com';
 chrome.storage.local.get(['user_id', 'api_url'], (items) => {
   if (items.user_id) USER_ID = items.user_id;
   if (items.api_url) API_URL = items.api_url;
+  
+  // Update rules immediately after retrieving the stored user and API configurations
+  updateBlockingRules();
 });
 
 // Pomodoro Timer State
@@ -396,6 +399,3 @@ chrome.storage.onChanged.addListener((changes, area) => {
     }
   }
 });
-
-// Initial update rules on startup
-updateBlockingRules();
