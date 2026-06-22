@@ -1,5 +1,12 @@
-const API_URL = 'https://chrome-extension-ts0n.onrender.com/api';
+let API_URL = 'https://chrome-extension-ts0n.onrender.com/api';
 let USER_ID = 'user_demo@example.com';
+let DASHBOARD_URL = 'http://localhost:5173'; // Default fallback
+
+chrome.storage.local.get(['user_id', 'api_url', 'dashboard_url'], (items) => {
+  if (items.user_id) USER_ID = items.user_id;
+  if (items.api_url) API_URL = items.api_url;
+  if (items.dashboard_url) DASHBOARD_URL = items.dashboard_url;
+});
 
 const QUOTES = [
   { text: "Concentrate all your thoughts upon the work at hand. The sun's rays do not burn until brought to a focus.", author: "Alexander Graham Bell" },
@@ -28,8 +35,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Button: Go Back to a safe workspace
   document.getElementById('go-back-btn').addEventListener('click', () => {
-    // Navigate away to a productive dashboard or generic homepage
-    window.location.href = 'http://localhost:5173';
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = DASHBOARD_URL;
+    }
   });
 
   // Button: Disable Focus Mode (Emergency Override)
@@ -51,8 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Notify background worker to refresh rules immediately
         chrome.runtime.sendMessage({ action: 'REFRESH_BLOCKING_RULES' }, () => {
-          // Go back in history or redirect
-          window.location.href = 'http://localhost:5173';
+          window.location.href = DASHBOARD_URL;
         });
       } catch (e) {
         console.error('Failed to disable Focus Mode:', e);
@@ -114,3 +123,18 @@ function syncTimer() {
     }
   });
 }
+
+// Sync user, api_url, and dashboard_url from storage changes while blocked page is open
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'local') {
+    if (changes.user_id) {
+      USER_ID = changes.user_id.newValue || 'user_demo@example.com';
+    }
+    if (changes.api_url) {
+      API_URL = changes.api_url.newValue || 'https://chrome-extension-ts0n.onrender.com/api';
+    }
+    if (changes.dashboard_url) {
+      DASHBOARD_URL = changes.dashboard_url.newValue || 'http://localhost:5173';
+    }
+  }
+});
