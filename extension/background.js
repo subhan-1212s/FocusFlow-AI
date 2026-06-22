@@ -98,18 +98,21 @@ async function updateBlockingRules() {
 
     // If focus mode is active, set up redirection rules
     if (focusMode && blockedSites.length > 0) {
-      const rules = blockedSites.map((site, index) => ({
-        id: index + 1,
-        priority: 1,
-        action: { 
-          type: 'redirect', 
-          redirect: { extensionPath: '/blocked/blocked.html' } 
-        },
-        condition: { 
-          urlFilter: `*://${site}/*`, 
-          resourceTypes: ['main_frame'] 
-        }
-      }));
+      const rules = blockedSites.map((site, index) => {
+        const cleanSite = site.replace(/^https?:\/\//i, '').replace(/^www\./i, '').trim();
+        return {
+          id: index + 1,
+          priority: 1,
+          action: { 
+            type: 'redirect', 
+            redirect: { extensionPath: '/blocked/blocked.html' } 
+          },
+          condition: { 
+            urlFilter: `||${cleanSite}`, 
+            resourceTypes: ['main_frame'] 
+          }
+        };
+      });
 
       await chrome.declarativeNetRequest.updateDynamicRules({
         removeRuleIds: oldRuleIds,
