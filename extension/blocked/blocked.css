@@ -32,6 +32,25 @@ body {
 }
 
 /* Background graphics */
+.stars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, rgba(197, 168, 128, 0.03), transparent),
+              url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Ccircle cx='10' cy='10' r='1' fill='%23C5A880' opacity='0.25'/%3E%3Ccircle cx='70' cy='30' r='1.5' fill='%23C5A880' opacity='0.4'/%3E%3Ccircle cx='40' cy='80' r='1.2' fill='%23C5A880' opacity='0.3'/%3E%3Ccircle cx='90' cy='70' r='1.8' fill='%23C5A880' opacity='0.5'/%3E%3C/svg%3E") repeat;
+  animation: starTwinkle 20s infinite linear;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes starTwinkle {
+  0% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.03); }
+  100% { opacity: 0.6; transform: scale(1); }
+}
+
 .grid-overlay {
   position: absolute;
   top: 0;
@@ -48,15 +67,21 @@ body {
 .container {
   max-width: 520px;
   width: 90%;
-  background: var(--card-bg);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--border);
+  background: rgba(10, 10, 12, 0.78);
+  backdrop-filter: blur(25px);
+  border: 1px solid rgba(197, 168, 128, 0.15);
   border-radius: 32px;
   padding: 40px;
-  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.65), 0 0 50px rgba(197, 168, 128, 0.04);
   text-align: center;
   z-index: 10;
   position: relative;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.container:hover {
+  border-color: rgba(197, 168, 128, 0.3);
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.7), 0 0 60px rgba(197, 168, 128, 0.08);
 }
 
 header {
@@ -115,11 +140,13 @@ header {
   width: 130px;
   height: 130px;
   border-radius: 50%;
-  border: 2px dashed rgba(99, 102, 241, 0.2);
+  border: 2px dashed rgba(197, 168, 128, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 20px;
+  position: relative;
+  animation: spin 30s infinite linear;
 }
 
 .breathing-circle-inner {
@@ -187,29 +214,70 @@ header {
   letter-spacing: 0.05em;
 }
 
-/* Timer widget */
 .timer-widget {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border);
-  padding: 16px;
-  border-radius: 20px;
+  padding: 16px 24px;
+  border-radius: 24px;
   margin-bottom: 30px;
   display: inline-block;
-  min-width: 220px;
+  min-width: 240px;
+  box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);
 }
 
 .timer-label {
   font-size: 0.65rem;
   font-weight: 700;
   color: var(--primary);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .timer-value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   font-size: 2.2rem;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  margin-top: 8px;
+}
+
+.time-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 50px;
+}
+
+.time-number {
+  background: linear-gradient(135deg, #fff 30%, var(--text-muted) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.time-unit {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   margin-top: 4px;
+}
+
+.time-colon {
+  font-size: 1.8rem;
+  color: rgba(197, 168, 128, 0.4);
+  line-height: 1;
+  margin-bottom: 12px;
+  animation: pulse 1s infinite alternate;
+}
+
+@keyframes pulse {
+  from { opacity: 0.4; }
+  to { opacity: 1; }
 }
 
 /* Actions */

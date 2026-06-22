@@ -6,15 +6,15 @@ chrome.storage.local.get(['user_id', 'api_url'], (items) => {
   if (items.api_url) BACKEND_API = items.api_url;
 });
 
-// Detect dashboard page dynamically to set backend api_url in local storage
+// Detect dashboard page dynamically to set backend api_url and dashboard_url in local storage
 if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
   const localApi = 'http://localhost:5000/api';
   BACKEND_API = localApi;
-  chrome.storage.local.set({ api_url: localApi });
+  chrome.storage.local.set({ api_url: localApi, dashboard_url: window.location.origin });
 } else if (window.location.hostname.includes('vercel.app') || window.location.hostname.includes('focusflow')) {
   const prodApi = 'https://chrome-extension-ts0n.onrender.com/api';
   BACKEND_API = prodApi;
-  chrome.storage.local.set({ api_url: prodApi });
+  chrome.storage.local.set({ api_url: prodApi, dashboard_url: window.location.origin });
 }
 
 let sidebarContainer = null;

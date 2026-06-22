@@ -1,11 +1,13 @@
 let API_URL = 'https://chrome-extension-ts0n.onrender.com/api';
 let USER_ID = 'user_demo@example.com';
+let DASHBOARD_URL = 'http://localhost:5173'; // Default fallback
 
 document.addEventListener('DOMContentLoaded', async () => {
   let interval;
-  chrome.storage.local.get(['user_id', 'api_url'], async (items) => {
+  chrome.storage.local.get(['user_id', 'api_url', 'dashboard_url'], async (items) => {
     if (items.user_id) USER_ID = items.user_id;
     if (items.api_url) API_URL = items.api_url;
+    if (items.dashboard_url) DASHBOARD_URL = items.dashboard_url;
 
     // Initial draw
     updateUI();
@@ -19,8 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Open Full Dashboard
     document.getElementById('open-dashboard').addEventListener('click', () => {
-      // In production, users will click dashboard to go to Vercel. We can default to localhost for development
-      chrome.tabs.create({ url: 'http://localhost:5173' });
+      chrome.tabs.create({ url: DASHBOARD_URL });
     });
 
     // Toggle Focus Mode
@@ -234,7 +235,7 @@ function updateQuickBlockUI(domain, blockedSites) {
   }
 }
 
-// Sync user and api_url from local storage changes in the popup
+// Sync user, api_url, and dashboard_url from local storage changes in the popup
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'local') {
     if (changes.user_id) {
@@ -242,6 +243,9 @@ chrome.storage.onChanged.addListener((changes, area) => {
     }
     if (changes.api_url) {
       API_URL = changes.api_url.newValue || 'https://chrome-extension-ts0n.onrender.com/api';
+    }
+    if (changes.dashboard_url) {
+      DASHBOARD_URL = changes.dashboard_url.newValue || 'http://localhost:5173';
     }
     updateUI();
   }

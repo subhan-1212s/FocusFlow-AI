@@ -111,7 +111,17 @@ function syncTimer() {
     const formattedMinutes = String(minutes).padStart(2, '0');
     const formattedSeconds = String(seconds).padStart(2, '0');
     
-    document.getElementById('timer-display').innerText = `${formattedMinutes}:${formattedSeconds}`;
+    document.getElementById('timer-display').innerHTML = `
+      <div class="time-block">
+        <span class="time-number">${formattedMinutes}</span>
+        <span class="time-unit">min</span>
+      </div>
+      <div class="time-colon">:</div>
+      <div class="time-block">
+        <span class="time-number">${formattedSeconds}</span>
+        <span class="time-unit">sec</span>
+      </div>
+    `;
     
     const label = document.getElementById('timer-phase');
     if (phase === 'break') {
