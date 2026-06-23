@@ -338,6 +338,10 @@ function handleIframeMessages(e) {
 
 // Sync user and api_url from local storage changes
 chrome.storage.onChanged.addListener((changes, area) => {
+  if (!isContextValid()) {
+    destroy();
+    return;
+  }
   if (area === 'local') {
     if (changes.user_id) {
       CURRENT_USER = changes.user_id.newValue || 'user_demo@example.com';
@@ -350,6 +354,10 @@ chrome.storage.onChanged.addListener((changes, area) => {
 
 // Listen for messages from background script to notify dashboard of a saved note
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (!isContextValid()) {
+    destroy();
+    return;
+  }
   if (message.action === 'FOCUSFLOW_NOTE_SAVED') {
     window.postMessage({ action: 'FOCUSFLOW_NOTE_SAVED' }, '*');
   }
