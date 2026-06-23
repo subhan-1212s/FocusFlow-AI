@@ -4,20 +4,74 @@ let activeDomain = null;
 
 let API_URL = 'https://chrome-extension-ts0n.onrender.com/api';
 let USER_ID = 'user_demo@example.com';
+// Pomodoro Timer State
+let pomoTimeLeft = 25 * 60; // 25 minutes default
+let pomoIsRunning = false;
+let pomoPhase = 'work'; // 'work' | 'break'
+let pomoSessionCount = 1;
+let pomoTargetEndTime = null;
+let pomoInterval = null;
+
+function loadPomoState() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(['pomoTimeLeft', 'pomoIsRunning', 'pomoPhase', 'pomoSessionCount', 'pomoTargetEndTime'], (items) => {
+      if (chrome.runtime.lastError) {
+        resolve();
+        return;
+      }
+      if (items.pomoTimeLeft !== undefined) pomoTimeLeft = items.pomoTimeLeft;
+      if (items.pomoIsRunning !== undefined) pomoIsRunning = items.pomoIsRunning;
+      if (items.pomoPhase !== undefined) pomoPhase = items.pomoPhase;
+      if (items.pomoSessionCount !== undefined) pomoSessionCount = items.pomoSessionCount;
+      if (items.pomoTargetEndTime !== undefined) pomoTargetEndTime = items.pomoTargetEndTime;
+      resolve();
+    });
+  });
+}
+
+function savePomoState() {
+  chrome.storage.local.set({
+    pomoTimeLeft,
+    pomoIsRunning,
+    pomoPhase,
+    pomoSessionCount,
+    pomoTargetEndTime
+  });
+}
+
+function resumeTickingInterval() {
+  if (pomoInterval) clearInterval(pomoInterval);
+  pomoInterval = setInterval(() => {
+    if (pomoTargetEndTime) {
+      pomoTimeLeft = Math.max(0, Math.round((pomoTargetEndTime - Date.now()) / 1000));
+      if (pomoTimeLeft === 0) {
+        handlePomodoroCompletion();
+      }
+    }
+  }, 1000);
+}
+
 chrome.storage.local.get(['user_id', 'api_url'], (items) => {
   if (items.user_id) USER_ID = items.user_id;
   if (items.api_url) API_URL = items.api_url;
   
   // Update rules immediately after retrieving the stored user and API configurations
   updateBlockingRules();
+  
+  // Load Pomodoro state
+  loadPomoState().then(() => {
+    // If it was running when service worker shut down, restore the interval and check if it completed
+    if (pomoIsRunning && pomoTargetEndTime) {
+      const now = Date.now();
+      if (now >= pomoTargetEndTime) {
+        handlePomodoroCompletion();
+      } else {
+        pomoTimeLeft = Math.max(0, Math.round((pomoTargetEndTime - now) / 1000));
+        resumeTickingInterval();
+      }
+    }
+  });
 });
-
-// Pomodoro Timer State
-let pomoTimeLeft = 25 * 60; // 25 minutes default
-let pomoIsRunning = false;
-let pomoPhase = 'work'; // 'work' | 'break'
-let pomoSessionCount = 1;
-let pomoInterval = null;
 
 // Track tab activation
 chrome.tabs.onActivated.addListener(async (activeInfo) => {
@@ -169,6 +223,9 @@ chrome.alarms.create('syncPreferences', { periodInMinutes: 2 });
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === 'syncPreferences') {
     updateBlockingRules();
+  } else if (alarm.name === 'pomodoroComplete') {
+    await loadPomoState();
+    handlePomodoroCompletion();
   }
 });
 
@@ -227,14 +284,14 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 function startPomodoro() {
   if (pomoIsRunning) return;
   pomoIsRunning = true;
+  pomoTargetEndTime = Date.now() + pomoTimeLeft * 1000;
   
-  pomoInterval = setInterval(() => {
-    if (pomoTimeLeft > 0) {
-      pomoTimeLeft--;
-    } else {
-      handlePomodoroCompletion();
-    }
-  }, 1000);
+  savePomoState();
+  
+  // Set alarm to wake up service worker
+  chrome.alarms.create('pomodoroComplete', { when: pomoTargetEndTime });
+  
+  resumeTickingInterval();
 }
 
 function pausePomodoro() {
@@ -243,12 +300,21 @@ function pausePomodoro() {
     clearInterval(pomoInterval);
     pomoInterval = null;
   }
+  if (pomoTargetEndTime) {
+    pomoTimeLeft = Math.max(0, Math.round((pomoTargetEndTime - Date.now()) / 1000));
+    pomoTargetEndTime = null;
+  }
+  chrome.alarms.clear('pomodoroComplete');
+  savePomoState();
 }
 
 function resetPomodoro() {
   pausePomodoro();
   pomoPhase = 'work';
   pomoTimeLeft = 25 * 60;
+  pomoTargetEndTime = null;
+  chrome.alarms.clear('pomodoroComplete');
+  savePomoState();
 }
 
 async function handlePomodoroCompletion() {
@@ -270,7 +336,7 @@ async function handlePomodoroCompletion() {
     
     chrome.notifications.create({
       type: 'basic',
-      iconUrl: 'popup/popup.html', // Chrome uses whatever page is accessible or standard paths
+      iconUrl: '/popup/icon-128.png',
       title: 'Focus Cycle Complete! ☕',
       message: 'Great job! Take a 5-minute break. Focus mode is temporarily suspended.',
       priority: 2
@@ -286,6 +352,7 @@ async function handlePomodoroCompletion() {
 
     chrome.notifications.create({
       type: 'basic',
+      iconUrl: '/popup/icon-128.png',
       title: 'Break Over! 🧠',
       message: 'Time to focus. Focus mode has been reactivated. Let\'s make progress!',
       priority: 2
@@ -293,6 +360,7 @@ async function handlePomodoroCompletion() {
   }
   
   // Auto restart next phase
+  savePomoState();
   startPomodoro();
 }
 
@@ -359,6 +427,12 @@ chrome.tabs.onRemoved.addListener((tabId) => {
 // Runtime Message Handlers
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'GET_POMODORO_STATE') {
+    if (pomoIsRunning && pomoTargetEndTime) {
+      pomoTimeLeft = Math.max(0, Math.round((pomoTargetEndTime - Date.now()) / 1000));
+      if (pomoTimeLeft === 0) {
+        handlePomodoroCompletion();
+      }
+    }
     const minutes = Math.floor(pomoTimeLeft / 60);
     const seconds = pomoTimeLeft % 60;
     sendResponse({

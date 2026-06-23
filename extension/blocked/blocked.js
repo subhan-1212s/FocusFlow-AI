@@ -31,7 +31,11 @@ const QUOTES = [
   { text: "It is during our darkest moments that we must focus to see the light.", author: "Aristotle" },
   { text: "Deep work is not some nostalgic affectation of a bygone era. It is instead an indispensable skill.", author: "Cal Newport" },
   { text: "There is no traffic jam along the extra mile.", author: "Roger Staubach" },
-  { text: "Only the focused mind can paint a masterpiece.", author: "Unknown" }
+  { text: "You do not rise to the level of your goals. You fall to the level of your systems.", author: "James Clear" },
+  { text: "He who is everywhere is nowhere.", author: "Seneca" },
+  { text: "Focus on being productive instead of busy.", author: "Tim Ferriss" },
+  { text: "The successful warrior is the average man, with laser-like focus.", author: "Bruce Lee" },
+  { text: "Very little is needed to make a happy life; it is all within yourself, in your way of thinking.", author: "Marcus Aurelius" }
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -121,7 +125,7 @@ function setRandomQuote() {
   const randomIndex = Math.floor(Math.random() * QUOTES.length);
   const selectedQuote = QUOTES[randomIndex];
   document.getElementById('quote-display').innerText = `"${selectedQuote.text}"`;
-  document.getElementById('author-display').innerText = `— ${selectedQuote.author}`;
+  document.getElementById('author-display').innerText = `- ${selectedQuote.author}`;
 }
 
 function runBreathingGuide() {
