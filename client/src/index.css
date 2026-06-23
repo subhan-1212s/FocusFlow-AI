@@ -2688,4 +2688,149 @@ input:checked + .slider:before {
   filter: drop-shadow(0px 0px 10px rgba(16, 103, 217, 0.08));
 }
 
+/* Custom Thin Scrollbar for dashboard cards */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 103, 217, 0.2);
+}
+
+/* Category Donut Center Text overlay */
+.category-chart-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.category-donut-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.category-donut-val {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.category-donut-lbl {
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 1px;
+}
+
+/* Premium Category Distribution list item */
+.premium-category-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  background: rgba(0, 0, 0, 0.005);
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  overflow: hidden;
+  margin-bottom: 2px;
+}
+
+.premium-category-item:hover {
+  transform: translateY(-1.5px);
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(16, 103, 217, 0.12);
+  box-shadow: 0 4px 12px rgba(16, 103, 217, 0.04);
+}
+
+.category-backdrop-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 1;
+  transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  opacity: 0.08;
+}
+
+.premium-category-item-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  z-index: 2;
+}
+
+.category-item-favicon-wrapper {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1.5px 4px rgba(0,0,0,0.06);
+  border: 1px solid rgba(0,0,0,0.04);
+  flex-shrink: 0;
+}
+
+.category-item-favicon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+.category-item-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+}
+
+.premium-category-item-stats {
+  display: flex;
+  align-items: center;
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+.category-item-time-badge {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-variant-numeric: tabular-nums;
+  display: inline-block;
+  line-height: 1.2;
+}
+
+
 

@@ -441,7 +441,7 @@ const App = () => {
   const COLORS = ['#1067d9', '#00d2ff', '#2e7d32', '#ed6c02', '#6200ee'];
   const pieData = stats.slice(0, 5).map(item => ({
     name: item._id,
-    value: Math.round(item.totalDuration / 60)
+    value: item.totalDuration // raw seconds for high precision
   }));
 
   // Generate rolling 7-day weekly activity focus hours (in hours/minutes)
@@ -777,9 +777,9 @@ const App = () => {
                       <h3>Time Distribution (Minutes)</h3>
                       <span className="text-slate-500 text-xs font-bold uppercase tracking-widest">Live Activity Domain Feed</span>
                     </div>
-                    <div style={{ height: '260px', width: '100%', marginTop: '16px' }}>
+                    <div style={{ height: '260px', width: '100%', marginTop: '16px', position: 'relative' }}>
                       {stats.length > 0 ? (
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height={260} minWidth={0}>
                           <AreaChart data={stats.map(s => ({ name: s._id, Minutes: Math.round(s.totalDuration / 60) }))}>
                             <defs>
                               <linearGradient id="colorMinutes" x1="0" y1="0" x2="0" y2="1">
@@ -798,7 +798,53 @@ const App = () => {
                           </AreaChart>
                         </ResponsiveContainer>
                       ) : (
-                        <div className="h-full flex items-center justify-center text-slate-400 italic text-sm">No domain logging detected yet. Surf the web to track!</div>
+                        <>
+                          <div style={{ filter: 'blur(3px) opacity(0.3)', pointerEvents: 'none', height: '100%', width: '100%' }}>
+                            <ResponsiveContainer width="100%" height={260} minWidth={0}>
+                              <AreaChart data={[
+                                { name: 'chrome-extension-sm.vercel.app', Minutes: 29 },
+                                { name: 'www.w3schools.com', Minutes: 12 },
+                                { name: 'vercel.com', Minutes: 8 },
+                                { name: 'skycast-sm.vercel.app', Minutes: 4 },
+                                { name: 'www.google.com', Minutes: 2 }
+                              ]}>
+                                <defs>
+                                  <linearGradient id="colorMinutesMock" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#1067d9" stopOpacity={0.4}/>
+                                    <stop offset="95%" stopColor="#1067d9" stopOpacity={0}/>
+                                  </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0, 0, 0, 0.04)" vertical={false} />
+                                <XAxis dataKey="name" stroke="#86868b" fontSize={10} tick={false} />
+                                <YAxis stroke="#86868b" fontSize={11} />
+                                <Area type="monotone" dataKey="Minutes" stroke="#1067d9" strokeWidth={3} fillOpacity={1} fill="url(#colorMinutesMock)" />
+                              </AreaChart>
+                            </ResponsiveContainer>
+                          </div>
+                          <div style={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            background: 'rgba(255, 255, 255, 0.85)',
+                            backdropFilter: 'blur(10px)',
+                            border: '1px solid rgba(16, 103, 217, 0.15)',
+                            padding: '12px 20px',
+                            borderRadius: '16px',
+                            boxShadow: '0 8px 32px rgba(16, 103, 217, 0.06)',
+                            textAlign: 'center',
+                            maxWidth: '85%',
+                            zIndex: 10,
+                            pointerEvents: 'none'
+                          }}>
+                            <span style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-main)', display: 'block' }}>
+                              ⚡ Live Focus Trends Pending
+                            </span>
+                            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginTop: '2px' }}>
+                              Browse target domains with the Chrome Extension to see live charts
+                            </span>
+                          </div>
+                        </>
                       )}
                     </div>
                   </motion.div>
@@ -813,7 +859,7 @@ const App = () => {
                        <span className="text-slate-500 text-xs font-bold uppercase tracking-widest">Rolling 7-Day Performance</span>
                      </div>
                     <div className="bar-chart-glow" style={{ height: '260px', width: '100%', marginTop: '16px' }}>
-                      <ResponsiveContainer width="100%" height="100%">
+                      <ResponsiveContainer width="100%" height={260} minWidth={0}>
                         <BarChart data={weeklyData}>
                           <defs>
                             <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
@@ -909,58 +955,150 @@ const App = () => {
                     <div className="chart-header">
                       <h3>Category Distribution</h3>
                     </div>
-                    <div style={{ height: '130px', width: '100%', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    
+                    <div className="category-chart-container" style={{ height: '130px', width: '100%' }}>
                       {pieData.length > 0 ? (
-                        <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                            <Pie
-                              data={pieData}
-                              cx="50%"
-                              cy="50%"
-                              innerRadius={40}
-                              outerRadius={55}
-                              paddingAngle={4}
-                              dataKey="value"
-                            >
-                              {pieData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                              ))}
-                            </Pie>
-                            <Tooltip 
-                              contentStyle={{ backgroundColor: '#ffffff', border: '1px solid rgba(0, 0, 0, 0.08)', borderRadius: '14px', color: '#1d1d1f' }}
-                              itemStyle={{ color: '#1d1d1f' }}
-                            />
-                          </PieChart>
-                        </ResponsiveContainer>
+                        <>
+                          <ResponsiveContainer width="100%" height={130} minWidth={0}>
+                            <PieChart>
+                              <Pie
+                                data={pieData}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={40}
+                                outerRadius={55}
+                                paddingAngle={4}
+                                dataKey="value"
+                              >
+                                {pieData.map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                ))}
+                              </Pie>
+                              <Tooltip 
+                                contentStyle={{ backgroundColor: '#ffffff', border: '1px solid rgba(0, 0, 0, 0.08)', borderRadius: '14px', color: '#1d1d1f' }}
+                                itemStyle={{ color: '#1d1d1f' }}
+                                formatter={(value) => {
+                                  const mins = Math.floor(value / 60);
+                                  const secs = value % 60;
+                                  return mins > 0 ? [`${mins}m ${secs}s`, 'Focus Time'] : [`${secs}s`, 'Focus Time'];
+                                }}
+                              />
+                            </PieChart>
+                          </ResponsiveContainer>
+                          <div className="category-donut-center">
+                            <span className="category-donut-val">
+                              {totalTrackedMinutes >= 60 ? `${(totalTrackedMinutes / 60).toFixed(1)}h` : `${totalTrackedMinutes}m`}
+                            </span>
+                            <span className="category-donut-lbl">Flow Time</span>
+                          </div>
+                        </>
                       ) : (
-                        <div className="text-slate-400 italic text-xs">No chart statistics logged.</div>
+                        <>
+                          <div style={{ filter: 'blur(3px) opacity(0.3)', pointerEvents: 'none', height: '100%', width: '100%' }}>
+                            <ResponsiveContainer width="100%" height={130} minWidth={0}>
+                              <PieChart>
+                                <Pie
+                                  data={[
+                                    { name: 'Mock1', value: 60 },
+                                    { name: 'Mock2', value: 30 },
+                                    { name: 'Mock3', value: 10 }
+                                  ]}
+                                  cx="50%"
+                                  cy="50%"
+                                  innerRadius={40}
+                                  outerRadius={55}
+                                  paddingAngle={4}
+                                  dataKey="value"
+                                >
+                                  <Cell fill={COLORS[0]} />
+                                  <Cell fill={COLORS[1]} />
+                                  <Cell fill={COLORS[2]} />
+                                </Pie>
+                              </PieChart>
+                            </ResponsiveContainer>
+                          </div>
+                          <div className="category-donut-center" style={{ filter: 'blur(1px) opacity(0.5)' }}>
+                            <span className="category-donut-val">--</span>
+                            <span className="category-donut-lbl">No Stats</span>
+                          </div>
+                          <div style={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            background: 'rgba(255, 255, 255, 0.85)',
+                            backdropFilter: 'blur(8px)',
+                            border: '1px solid rgba(16, 103, 217, 0.12)',
+                            padding: '6px 12px',
+                            borderRadius: '10px',
+                            boxShadow: '0 4px 16px rgba(16, 103, 217, 0.04)',
+                            textAlign: 'center',
+                            maxWidth: '90%',
+                            zIndex: 10,
+                            pointerEvents: 'none'
+                          }}>
+                            <span style={{ fontSize: '0.65rem', fontWeight: '700', color: 'var(--text-main)' }}>
+                              📊 Pending Statistics
+                            </span>
+                          </div>
+                        </>
                       )}
                     </div>
-                    <div className="flex flex-col gap-2 mt-2 overflow-y-auto" style={{ maxHeight: '140px', paddingRight: '2px' }}>
+
+                    <div className="flex flex-col gap-2 mt-2 overflow-y-auto custom-scrollbar" style={{ maxHeight: '140px', paddingRight: '2px' }}>
                       {(() => {
-                        const totalPieMins = pieData.reduce((acc, curr) => acc + curr.value, 0) || 1;
-                        return pieData.map((entry, index) => (
-                          <div 
-                            key={index} 
-                            className="flex flex-col gap-1 p-2 transition hover:bg-black/5" 
-                            style={{ 
-                              background: 'rgba(0,0,0,0.01)', 
-                              border: '1px solid rgba(0,0,0,0.03)',
-                              borderRadius: '12px' 
-                            }}
-                          >
-                            <div className="flex justify-between items-center text-[10px]">
-                              <div className="flex items-center gap-1.5">
-                                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
-                                <span className="font-semibold text-slate-700 truncate" style={{ maxWidth: '140px' }} title={entry.name}>{entry.name}</span>
+                        const totalPieSecs = pieData.reduce((acc, curr) => acc + curr.value, 0) || 1;
+                        return pieData.map((entry, index) => {
+                          const percentage = Math.round((entry.value / totalPieSecs) * 100);
+                          const mins = Math.floor(entry.value / 60);
+                          const secs = entry.value % 60;
+                          const timeStr = mins > 0 ? `${mins}m` : `${secs}s`;
+                          const sliceColor = COLORS[index % COLORS.length];
+                          const faviconUrl = `https://www.google.com/s2/favicons?domain=${entry.name}&sz=32`;
+                          
+                          return (
+                            <div 
+                              key={index} 
+                              className="premium-category-item"
+                              title={entry.name}
+                            >
+                              <div 
+                                className="category-backdrop-progress" 
+                                style={{ 
+                                  width: `${percentage}%`, 
+                                  backgroundColor: sliceColor 
+                                }}
+                              />
+                              
+                              <div className="premium-category-item-content">
+                                <div className="category-item-favicon-wrapper">
+                                  <img 
+                                    src={faviconUrl} 
+                                    alt="" 
+                                    className="category-item-favicon"
+                                    onError={(e) => {
+                                      e.target.style.display = 'none';
+                                      e.target.parentNode.style.backgroundColor = sliceColor;
+                                    }}
+                                  />
+                                </div>
+                                <span className="category-item-name">{entry.name}</span>
                               </div>
-                              <span className="font-bold px-1.5 py-0.5 rounded-md text-[9px]" style={{ color: COLORS[index % COLORS.length], background: `${COLORS[index % COLORS.length]}12` }}>{entry.value}m</span>
+                              
+                              <div className="premium-category-item-stats">
+                                <span 
+                                  className="category-item-time-badge" 
+                                  style={{ 
+                                    color: sliceColor, 
+                                    backgroundColor: `${sliceColor}12` 
+                                  }}
+                                >
+                                  {timeStr}
+                                </span>
+                              </div>
                             </div>
-                            <div className="w-full bg-slate-100 rounded-full" style={{ height: '4px', overflow: 'hidden' }}>
-                              <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(entry.value / totalPieMins) * 100}%`, backgroundColor: COLORS[index % COLORS.length] }}></div>
-                            </div>
-                          </div>
-                        ));
+                          );
+                        });
                       })()}
                     </div>
                   </motion.div>
