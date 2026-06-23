@@ -421,7 +421,8 @@ h1, h2, h3, h4, h5, h6, .brand h2, .landing-title, .features-section-title, .ins
   display: flex;
   flex-direction: column;
   gap: 18px;
-  min-height: 520px; /* Tall min-height to unify columns like a true Kanban board */
+  min-height: 240px; /* Compact minimum height when empty, will expand dynamically */
+  height: 100%;
 }
 
 .task-column p {
@@ -598,6 +599,12 @@ h1, h2, h3, h4, h5, h6, .brand h2, .landing-title, .features-section-title, .ins
   gap: 24px;
 }
 
+.modal-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 .modal-header {
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   padding-bottom: 16px;
@@ -653,6 +660,7 @@ h1, h2, h3, h4, h5, h6, .brand h2, .landing-title, .features-section-title, .ins
   justify-content: space-between;
   align-items: center;
   gap: 24px;
+  row-gap: 16px;
   flex-wrap: wrap; /* Auto-wrapping on smaller screens */
   padding: 24px 32px;
 }
@@ -667,14 +675,27 @@ h1, h2, h3, h4, h5, h6, .brand h2, .landing-title, .features-section-title, .ins
 
 .workspace-capturer-form {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   align-items: center;
   flex-wrap: wrap;
 }
 
 .workspace-capturer-form .input-field {
-  width: 240px;
+  width: 260px;
+  height: 46px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--border);
+  color: var(--text-main);
   max-width: 100%;
+}
+
+.workspace-capturer-form .btn {
+  height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .form-group {
