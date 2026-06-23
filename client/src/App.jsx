@@ -1199,7 +1199,7 @@ const App = () => {
                               onClick={() => handleToggleTask(task._id, task.completed)}
                               className="task-checkbox-btn"
                             ></button>
-                            <span className="task-title font-bold text-rose-200">{task.title}</span>
+                            <span className="task-title font-bold text-rose-700">{task.title}</span>
                           </div>
                           {task.description && <p className="task-details">{task.description}</p>}
                           <div className="task-card-footer">

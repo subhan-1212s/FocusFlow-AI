@@ -414,14 +414,14 @@ h1, h2, h3, h4, h5, h6, .brand h2, .landing-title, .features-section-title, .ins
 }
 
 .task-column {
-  background: rgba(0, 0, 0, 0.02);
+  background: rgba(0, 0, 0, 0.015);
   border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 20px;
+  border-radius: 24px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  min-height: 140px;
+  gap: 18px;
+  min-height: 520px; /* Tall min-height to unify columns like a true Kanban board */
 }
 
 .task-column p {
@@ -461,13 +461,15 @@ h1, h2, h3, h4, h5, h6, .brand h2, .landing-title, .features-section-title, .ins
 .task-card {
   background: var(--card-bg);
   border: 1px solid var(--border);
-  padding: 16px;
-  border-radius: 16px;
+  padding: 20px;
+  border-radius: 20px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-  transition: all 0.25s;
+  gap: 14px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.02);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 120px; /* Standard min-height to prevent vertical collapse */
+  justify-content: space-between;
 }
 
 .task-card:hover {
@@ -674,9 +676,12 @@ h1, h2, h3, h4, h5, h6, .brand h2, .landing-title, .features-section-title, .ins
 .note-card {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
   cursor: pointer;
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  height: 240px; /* Unified height for perfect grid alignment */
+  justify-content: space-between;
+  padding: 24px;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .note-card:hover {
@@ -708,6 +713,12 @@ h1, h2, h3, h4, h5, h6, .brand h2, .landing-title, .features-section-title, .ins
   border-left: 3px solid var(--primary);
   padding-left: 12px;
   flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 12px 0;
 }
 
 .note-title-meta {
@@ -735,7 +746,10 @@ h1, h2, h3, h4, h5, h6, .brand h2, .landing-title, .features-section-title, .ins
 .session-card {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
+  padding: 24px;
+  height: 320px; /* Standardize card height in workspaces grid */
+  justify-content: space-between;
 }
 
 .session-header {
@@ -2679,11 +2693,11 @@ input:checked + .slider:before {
 }
 
 .stepper-content {
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.6);
   border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 24px 30px;
-  transition: all 0.3s;
+  border-radius: 24px;
+  padding: 28px 36px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .stepper-content:hover {
