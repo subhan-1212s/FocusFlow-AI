@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
 :root {
   --primary: #1067d9; /* Royal Blue */
@@ -23,7 +23,7 @@
 }
 
 body {
-  font-family: 'Google Sans', 'Roboto', 'Outfit', Arial, sans-serif;
+  font-family: 'Outfit', sans-serif;
   background-color: var(--bg-dark);
   color: var(--text-main);
   min-height: 100vh;
@@ -668,8 +668,8 @@ body {
 
 .note-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(197, 168, 128, 0.3);
-  box-shadow: 0 8px 24px rgba(197, 168, 128, 0.1);
+  border-color: rgba(16, 103, 217, 0.2);
+  box-shadow: 0 8px 24px rgba(16, 103, 217, 0.05);
 }
 
 .note-header-row {
@@ -682,8 +682,8 @@ body {
   font-size: 0.72rem;
   font-weight: 600;
   color: var(--primary);
-  background: rgba(197, 168, 128, 0.08);
-  border: 1px solid rgba(197, 168, 128, 0.15);
+  background: rgba(16, 103, 217, 0.08);
+  border: 1px solid rgba(16, 103, 217, 0.15);
   padding: 3px 10px;
   border-radius: 8px;
 }
@@ -691,7 +691,7 @@ body {
 .note-card-text {
   font-size: 0.88rem;
   line-height: 1.5;
-  color: #e2e8f0;
+  color: rgba(29, 29, 31, 0.75); /* Charcoal Grey Text with 75% Opacity */
   border-left: 3px solid var(--primary);
   padding-left: 12px;
   flex: 1;
@@ -1251,7 +1251,7 @@ input:checked + .slider:before {
   overflow-x: hidden;
   overflow-y: clip;
   background-color: var(--bg-dark);
-  font-family: 'Google Sans', 'Roboto', 'Outfit', Arial, sans-serif;
+  font-family: 'Outfit', sans-serif;
   color: var(--text-main);
   display: flex;
   flex-direction: column;

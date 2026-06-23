@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
 :root {
   --primary: #1067d9; /* Royal Blue */
@@ -25,7 +25,7 @@ body {
   width: 340px;
   background-color: var(--bg-dark);
   color: var(--text-main);
-  font-family: 'Google Sans', 'Roboto', 'Outfit', Arial, sans-serif;
+  font-family: 'Outfit', sans-serif;
   overflow: hidden;
 }
 

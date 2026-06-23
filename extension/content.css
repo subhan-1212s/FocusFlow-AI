@@ -53,7 +53,7 @@
   padding: 8px 16px;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06), 0 0 15px rgba(16, 103, 217, 0.05);
-  font-family: 'Google Sans', 'Roboto', 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -95,7 +95,7 @@
   padding: 14px 22px;
   border-radius: 14px;
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08);
-  font-family: 'Google Sans', 'Roboto', 'Outfit', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 13px;
   font-weight: 600;
   z-index: 2147483644;
