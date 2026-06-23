@@ -1,7 +1,80 @@
 let BACKEND_API = 'https://chrome-extension-ts0n.onrender.com/api';
 let CURRENT_USER = 'user_demo@example.com';
 
-chrome.storage.local.get(['user_id', 'api_url'], (items) => {
+function isContextValid() {
+  try {
+    return typeof chrome !== 'undefined' && chrome.runtime && !!chrome.runtime.id;
+  } catch (e) {
+    return false;
+  }
+}
+
+function destroy() {
+  try {
+    const trigger = document.getElementById('focusflow-trigger');
+    if (trigger) trigger.remove();
+    
+    const container = document.getElementById('focusflow-sidebar-container');
+    if (container) container.remove();
+    
+    const tooltip = document.getElementById('focusflow-select-tooltip');
+    if (tooltip) tooltip.remove();
+    
+    document.removeEventListener('mouseup', handleTextSelection);
+    document.removeEventListener('keyup', handleTextSelection);
+    window.removeEventListener('message', handleIframeMessages);
+  } catch (e) {
+    // Ignore cleanup errors
+  }
+}
+
+function checkContext() {
+  if (!isContextValid()) {
+    destroy();
+    return false;
+  }
+  return true;
+}
+
+function safeGetStorage(keys, callback) {
+  if (!checkContext()) return;
+  try {
+    chrome.storage.local.get(keys, (items) => {
+      if (chrome.runtime.lastError) return;
+      callback(items);
+    });
+  } catch (e) {
+    destroy();
+  }
+}
+
+function safeSetStorage(data, callback) {
+  if (!checkContext()) return;
+  try {
+    chrome.storage.local.set(data, () => {
+      if (chrome.runtime.lastError) return;
+      if (callback) callback();
+    });
+  } catch (e) {
+    destroy();
+  }
+}
+
+function safeSendMessage(message, callback) {
+  if (!checkContext()) return;
+  try {
+    chrome.runtime.sendMessage(message, (response) => {
+      if (chrome.runtime.lastError) {
+        return;
+      }
+      if (callback) callback(response);
+    });
+  } catch (e) {
+    destroy();
+  }
+}
+
+safeGetStorage(['user_id', 'api_url'], (items) => {
   if (items.user_id) CURRENT_USER = items.user_id;
   if (items.api_url) BACKEND_API = items.api_url;
 });
@@ -10,11 +83,11 @@ chrome.storage.local.get(['user_id', 'api_url'], (items) => {
 if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
   const localApi = 'http://localhost:5000/api';
   BACKEND_API = localApi;
-  chrome.storage.local.set({ api_url: localApi, dashboard_url: window.location.origin });
+  safeSetStorage({ api_url: localApi, dashboard_url: window.location.origin });
 } else if (window.location.hostname.includes('vercel.app') || window.location.hostname.includes('focusflow')) {
   const prodApi = 'https://chrome-extension-ts0n.onrender.com/api';
   BACKEND_API = prodApi;
-  chrome.storage.local.set({ api_url: prodApi, dashboard_url: window.location.origin });
+  safeSetStorage({ api_url: prodApi, dashboard_url: window.location.origin });
 }
 
 let sidebarContainer = null;
@@ -78,6 +151,7 @@ function init() {
 }
 
 function toggleSidebar() {
+  if (!checkContext()) return;
   sidebarIsOpen = !sidebarIsOpen;
   
   if (sidebarIsOpen) {
@@ -95,6 +169,7 @@ function toggleSidebar() {
 
 // Handle selected texts on host pages
 function handleTextSelection(e) {
+  if (!checkContext()) return;
   const selection = window.getSelection();
   const selectedText = selection.toString().trim();
 
@@ -143,7 +218,7 @@ function removeSelectionTooltip() {
 
 // Save Clipped text selection to backend DB
 async function saveHighlight(text) {
-  chrome.storage.local.get('user_id', async (items) => {
+  safeGetStorage('user_id', async (items) => {
     const activeUser = items.user_id || CURRENT_USER;
     const note = {
       userId: activeUser,
@@ -165,10 +240,12 @@ async function saveHighlight(text) {
         showToast('Selection saved to FocusFlow Knowledge Hub! ⚡');
         
         // Let sidebar know if it is open to refresh list
-        sidebarIframe.contentWindow.postMessage({ action: 'REFRESH_NOTES' }, '*');
+        if (sidebarIframe && sidebarIframe.contentWindow) {
+          sidebarIframe.contentWindow.postMessage({ action: 'REFRESH_NOTES' }, '*');
+        }
         
         // Broadcast to background worker to update any open dashboard tabs instantly
-        chrome.runtime.sendMessage({ action: 'NOTE_SAVED' });
+        safeSendMessage({ action: 'NOTE_SAVED' });
       }
     } catch (err) {
       console.error('FocusFlow clipping sync failed:', err);
@@ -195,6 +272,8 @@ function showToast(message) {
 
 // Receive messages from host page or sidebar
 function handleIframeMessages(e) {
+  if (!checkContext()) return;
+
   if (e.data && e.data.action === 'GET_PAGE_DATA') {
     // Gather parent page raw content blocks for AI summarizer
     const bodyTexts = [];
@@ -209,22 +288,28 @@ function handleIframeMessages(e) {
 
     const pageContent = bodyTexts.join('\n').substring(0, 10000);
 
-    sidebarIframe.contentWindow.postMessage({
-      action: 'RESPOND_PAGE_DATA',
-      title: document.title,
-      url: window.location.href,
-      textContent: pageContent
-    }, '*');
+    if (sidebarIframe && sidebarIframe.contentWindow) {
+      sidebarIframe.contentWindow.postMessage({
+        action: 'RESPOND_PAGE_DATA',
+        title: document.title,
+        url: window.location.href,
+        textContent: pageContent
+      }, '*');
+    }
   } 
   
   else if (e.data && e.data.action === 'CLOSE_SIDEBAR') {
     toggleSidebar();
   }
 
+  else if (e.data && e.data.action === 'REFRESH_PARENT_PAGE') {
+    window.location.reload();
+  }
+
   // Bridge messages from the webpage to the background script for workspaces
   else if (e.data && e.data.action === 'FOCUSFLOW_CAPTURE_TABS') {
     const name = e.data.name;
-    chrome.runtime.sendMessage({ action: 'GET_ACTIVE_TABS' }, (response) => {
+    safeSendMessage({ action: 'GET_ACTIVE_TABS' }, (response) => {
       if (response && response.tabs) {
         window.postMessage({
           action: 'FOCUSFLOW_TABS_RESPOND',
@@ -236,14 +321,14 @@ function handleIframeMessages(e) {
   }
   
   else if (e.data && e.data.action === 'FOCUSFLOW_RESTORE_WORKSPACE') {
-    chrome.runtime.sendMessage({
+    safeSendMessage({
       action: 'RESTORE_WORKSPACE',
       tabs: e.data.tabs
     });
   }
   
   else if (e.data && e.data.action === 'FOCUSFLOW_SYNC_USER') {
-    chrome.runtime.sendMessage({ action: 'SYNC_USER', userId: e.data.userId });
+    safeSendMessage({ action: 'SYNC_USER', userId: e.data.userId });
   }
 }
 

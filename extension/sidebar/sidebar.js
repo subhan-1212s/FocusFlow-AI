@@ -5,8 +5,107 @@ let currentTabDomain = '';
 let currentTabUrl = '';
 let currentTabTitle = '';
 
+function isContextValid() {
+  try {
+    return typeof chrome !== 'undefined' && chrome.runtime && !!chrome.runtime.id;
+  } catch (e) {
+    return false;
+  }
+}
+
+let isInvalidated = false;
+let pomoInterval = null;
+
+function handleInvalidatedContext() {
+  if (isInvalidated) return;
+  isInvalidated = true;
+  
+  if (pomoInterval) {
+    clearInterval(pomoInterval);
+    pomoInterval = null;
+  }
+  
+  // Show a clean overlay or notification inside the sidebar
+  const overlay = document.createElement('div');
+  overlay.style.position = 'fixed';
+  overlay.style.top = '0';
+  overlay.style.left = '0';
+  overlay.style.width = '100%';
+  overlay.style.height = '100%';
+  overlay.style.background = 'rgba(255, 255, 255, 0.96)';
+  overlay.style.color = '#374151';
+  overlay.style.display = 'flex';
+  overlay.style.flexDirection = 'column';
+  overlay.style.alignItems = 'center';
+  overlay.style.justifyContent = 'center';
+  overlay.style.padding = '20px';
+  overlay.style.textAlign = 'center';
+  overlay.style.zIndex = '10000';
+  overlay.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+  overlay.innerHTML = `
+    <div style="font-size: 32px; margin-bottom: 16px;">🔄</div>
+    <h3 style="margin: 0 0 8px 0; font-size: 15px; font-weight: 600; color: #1f2937;">Extension Reloaded</h3>
+    <p style="margin: 0 0 16px 0; font-size: 12px; color: #6b7280; line-height: 1.5;">FocusFlow Extension has been updated or reloaded. Please refresh your page to restore the assistant sidebar.</p>
+    <button id="refresh-page-btn" style="background: #eab308; color: #000; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.2s; outline: none; box-shadow: 0 2px 4px rgba(234, 179, 8, 0.2);">
+      Refresh Page
+    </button>
+  `;
+  document.body.appendChild(overlay);
+  
+  document.getElementById('refresh-page-btn').addEventListener('click', () => {
+    window.parent.postMessage({ action: 'REFRESH_PARENT_PAGE' }, '*');
+  });
+}
+
+function safeGetStorage(keys, callback) {
+  if (!isContextValid()) {
+    handleInvalidatedContext();
+    return;
+  }
+  try {
+    chrome.storage.local.get(keys, (items) => {
+      if (chrome.runtime.lastError) return;
+      if (callback) callback(items);
+    });
+  } catch (e) {
+    handleInvalidatedContext();
+  }
+}
+
+function safeSendMessage(message, callback) {
+  if (!isContextValid()) {
+    handleInvalidatedContext();
+    return;
+  }
+  try {
+    chrome.runtime.sendMessage(message, (response) => {
+      if (chrome.runtime.lastError) {
+        return;
+      }
+      if (callback) callback(response);
+    });
+  } catch (e) {
+    handleInvalidatedContext();
+  }
+}
+
+function safeQueryTabs(queryInfo, callback) {
+  if (!isContextValid()) {
+    handleInvalidatedContext();
+    return;
+  }
+  try {
+    chrome.tabs.query(queryInfo, (tabs) => {
+      if (chrome.runtime.lastError) return;
+      if (callback) callback(tabs);
+    });
+  } catch (e) {
+    handleInvalidatedContext();
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-  chrome.storage.local.get(['user_id', 'api_url'], (items) => {
+  safeGetStorage(['user_id', 'api_url'], (items) => {
     if (items.user_id) USER_ID = items.user_id;
     if (items.api_url) API_URL = items.api_url;
   });
@@ -44,17 +143,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 3. Pomodoro Timer State Sync
   syncPomodoro();
-  setInterval(syncPomodoro, 1000);
+  pomoInterval = setInterval(syncPomodoro, 1000);
 
   // Pomodoro controls in sidebar
   document.getElementById('sidebar-pomo-start').addEventListener('click', () => {
-    chrome.runtime.sendMessage({ action: 'START_POMODORO' }, syncPomodoro);
+    safeSendMessage({ action: 'START_POMODORO' }, syncPomodoro);
   });
   document.getElementById('sidebar-pomo-pause').addEventListener('click', () => {
-    chrome.runtime.sendMessage({ action: 'PAUSE_POMODORO' }, syncPomodoro);
+    safeSendMessage({ action: 'PAUSE_POMODORO' }, syncPomodoro);
   });
   document.getElementById('sidebar-pomo-reset').addEventListener('click', () => {
-    chrome.runtime.sendMessage({ action: 'RESET_POMODORO' }, syncPomodoro);
+    safeSendMessage({ action: 'RESET_POMODORO' }, syncPomodoro);
   });
 
   // 4. AI Chat Bot Submission
@@ -79,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Synchronize Pomodoro timer ticking with background
 function syncPomodoro() {
-  chrome.runtime.sendMessage({ action: 'GET_POMODORO_STATE' }, (response) => {
+  safeSendMessage({ action: 'GET_POMODORO_STATE' }, (response) => {
     if (!response) return;
     const { minutes, seconds, isRunning, phase, sessionCount } = response;
     
@@ -115,7 +214,7 @@ function syncPomodoro() {
 
 // Fetch active tab domain
 async function fetchCurrentTabInfo() {
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+  safeQueryTabs({ active: true, currentWindow: true }, (tabs) => {
     const tab = tabs[0];
     if (tab && tab.url && tab.url.startsWith('http')) {
       currentTabUrl = tab.url;
@@ -139,30 +238,30 @@ async function handleChatSubmit(e) {
   // Render typing AI message placeholder
   const aiMessageId = appendChatMessage('<div class="spinner"></div>', 'ai-msg');
 
-  try {
-    // Check if custom user Gemini key is saved in storage
-    const storage = await chrome.storage.local.get('gemini_key');
-    const userKey = storage.gemini_key || '';
-
-    const response = await fetch(`${API_URL}/ai/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, userKey })
-    });
-    const data = await response.json();
-    
-    // Overwrite typing container with formatted response
-    const msgDiv = document.getElementById(aiMessageId);
-    if (data.text) {
-      msgDiv.innerHTML = parseMarkdown(data.text);
-    } else {
-      msgDiv.innerText = data.error || 'Oops, failed to fetch AI response.';
+  // Check if custom user Gemini key is saved in storage
+  safeGetStorage('gemini_key', async (storage) => {
+    const userKey = (storage && storage.gemini_key) || '';
+    try {
+      const response = await fetch(`${API_URL}/ai/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt, userKey })
+      });
+      const data = await response.json();
+      
+      // Overwrite typing container with formatted response
+      const msgDiv = document.getElementById(aiMessageId);
+      if (data.text) {
+        msgDiv.innerHTML = parseMarkdown(data.text);
+      } else {
+        msgDiv.innerText = data.error || 'Oops, failed to fetch AI response.';
+      }
+    } catch (err) {
+      const msgDiv = document.getElementById(aiMessageId);
+      msgDiv.innerText = 'Unable to connect to the backend assistant service.';
+      console.error(err);
     }
-  } catch (err) {
-    const msgDiv = document.getElementById(aiMessageId);
-    msgDiv.innerText = 'Unable to connect to the backend assistant service.';
-    console.error(err);
-  }
+  });
 }
 
 let messageCounter = 0;
@@ -192,33 +291,33 @@ async function handleHostMessages(e) {
   if (e.data && e.data.action === 'RESPOND_PAGE_DATA') {
     const { textContent, url, title } = e.data;
 
-    try {
-      const storage = await chrome.storage.local.get('gemini_key');
-      const userKey = storage.gemini_key || '';
-
-      const response = await fetch(`${API_URL}/ai/summarize`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ textContent, url, title, userKey })
-      });
-      const data = await response.json();
-      
-      document.getElementById('summary-loader').classList.add('hidden');
-      const display = document.getElementById('summary-display');
-      display.classList.remove('hidden');
-      
-      if (data.summary) {
-        display.innerHTML = parseMarkdown(data.summary);
-      } else {
-        display.innerText = data.error || 'Failed to synthesize summary.';
+    safeGetStorage('gemini_key', async (storage) => {
+      const userKey = (storage && storage.gemini_key) || '';
+      try {
+        const response = await fetch(`${API_URL}/ai/summarize`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ textContent, url, title, userKey })
+        });
+        const data = await response.json();
+        
+        document.getElementById('summary-loader').classList.add('hidden');
+        const display = document.getElementById('summary-display');
+        display.classList.remove('hidden');
+        
+        if (data.summary) {
+          display.innerHTML = parseMarkdown(data.summary);
+        } else {
+          display.innerText = data.error || 'Failed to synthesize summary.';
+        }
+      } catch (err) {
+        document.getElementById('summary-loader').classList.add('hidden');
+        const display = document.getElementById('summary-display');
+        display.classList.remove('hidden');
+        display.innerText = 'Failed to connect to backend summarizer API.';
+        console.error(err);
       }
-    } catch (err) {
-      document.getElementById('summary-loader').classList.add('hidden');
-      const display = document.getElementById('summary-display');
-      display.classList.remove('hidden');
-      display.innerText = 'Failed to connect to backend summarizer API.';
-      console.error(err);
-    }
+    });
   } 
   
   else if (e.data && e.data.action === 'REFRESH_NOTES') {
@@ -437,17 +536,23 @@ function escapeHtml(text) {
 }
 
 // Sync user and api_url from local storage changes in the sidebar
-chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === 'local') {
-    if (changes.user_id) {
-      USER_ID = changes.user_id.newValue || 'user_demo@example.com';
-      fetchTasks();
-      fetchNotes();
+if (isContextValid()) {
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (!isContextValid()) {
+      handleInvalidatedContext();
+      return;
     }
-    if (changes.api_url) {
-      API_URL = changes.api_url.newValue || 'https://chrome-extension-ts0n.onrender.com/api';
-      fetchTasks();
-      fetchNotes();
+    if (area === 'local') {
+      if (changes.user_id) {
+        USER_ID = changes.user_id.newValue || 'user_demo@example.com';
+        fetchTasks();
+        fetchNotes();
+      }
+      if (changes.api_url) {
+        API_URL = changes.api_url.newValue || 'https://chrome-extension-ts0n.onrender.com/api';
+        fetchTasks();
+        fetchNotes();
+      }
     }
-  }
-});
+  });
+}

@@ -705,304 +705,268 @@ const App = () => {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.25 }}
+            transition={{ duration: 0.3 }}
           >
             {/* 1. ANALYTICS DASHBOARD VIEW */}
             {activeTab === 'dashboard' && (
-              <div className="dashboard-grid-container" style={{ display: 'flex', flexDirection: 'row', gap: '24px', flexWrap: 'wrap' }}>
+              <div className="dashboard-view-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%' }}>
                 
-                {/* Left Column (2/3 width) */}
-                <div className="dashboard-left-column" style={{ flex: '2', minWidth: '320px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                {/* Full-width Stats widgets at top */}
+                <motion.div 
+                  className="stats-grid-full"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="show"
+                >
+                  <motion.div 
+                    variants={itemVariants} 
+                    className="glass-card stat-widget"
+                    whileHover={{ y: -5, boxShadow: "0 12px 28px rgba(16, 103, 217, 0.08)", borderColor: "rgba(16, 103, 217, 0.15)" }}
+                  >
+                    <div className="stat-info">
+                      <span className="label">Total Focus Time</span>
+                      <span className="value">{Math.floor(totalTrackedMinutes / 60)}h {totalTrackedMinutes % 60}m</span>
+                      <span className="trend">+12.4% from last week</span>
+                    </div>
+                    <div className="stat-icon-wrapper text-primary">
+                      <Clock size={24} />
+                    </div>
+                  </motion.div>
+
+                  <motion.div 
+                    variants={itemVariants} 
+                    className="glass-card stat-widget"
+                    whileHover={{ y: -5, boxShadow: "0 12px 28px rgba(16, 103, 217, 0.08)", borderColor: "rgba(16, 103, 217, 0.15)" }}
+                  >
+                    <div className="stat-info">
+                      <span className="label">Targets Met</span>
+                      <span className="value">{completedTasksCount} / {tasks.length}</span>
+                      <span className="trend text-emerald">Daily Goal Completed</span>
+                    </div>
+                    <div className="stat-icon-wrapper text-emerald">
+                      <CheckSquare size={24} />
+                    </div>
+                  </motion.div>
+
+                  <motion.div 
+                    variants={itemVariants} 
+                    className="glass-card stat-widget"
+                    whileHover={{ y: -5, boxShadow: "0 12px 28px rgba(16, 103, 217, 0.08)", borderColor: "rgba(16, 103, 217, 0.15)" }}
+                  >
+                    <div className="stat-info">
+                      <span className="label">Distractions Prevented</span>
+                      <span className="value">42 attempts</span>
+                      <span className="trend text-emerald">Saved ~1.5 hours today</span>
+                    </div>
+                    <div className="stat-icon-wrapper text-rose">
+                      <Shield size={24} />
+                    </div>
+                  </motion.div>
+                </motion.div>
+
+                {/* Two-Column Middle Section */}
+                <div className="dashboard-grid-container" style={{ display: 'flex', flexDirection: 'row', gap: '24px', flexWrap: 'wrap', width: '100%' }}>
                   
-                  {/* Stats Widgets */}
-                  <motion.div 
-                    className="stats-grid"
-                    variants={containerVariants}
-                    initial="hidden"
-                    animate="show"
-                    style={{ margin: 0 }}
-                  >
-                    <motion.div 
-                      variants={itemVariants} 
-                      className="glass-card stat-widget"
-                      whileHover={{ y: -5, boxShadow: "0 12px 28px rgba(16, 103, 217, 0.08)", borderColor: "rgba(16, 103, 217, 0.15)" }}
-                    >
-                      <div className="stat-info">
-                        <span className="label">Total Focus Time</span>
-                        <span className="value">{Math.floor(totalTrackedMinutes / 60)}h {totalTrackedMinutes % 60}m</span>
-                        <span className="trend">+12.4% from last week</span>
-                      </div>
-                      <div className="stat-icon-wrapper text-primary">
-                        <Clock size={24} />
-                      </div>
-                    </motion.div>
-
-                    <motion.div 
-                      variants={itemVariants} 
-                      className="glass-card stat-widget"
-                      whileHover={{ y: -5, boxShadow: "0 12px 28px rgba(16, 103, 217, 0.08)", borderColor: "rgba(16, 103, 217, 0.15)" }}
-                    >
-                      <div className="stat-info">
-                        <span className="label">Targets Met</span>
-                        <span className="value">{completedTasksCount} / {tasks.length}</span>
-                        <span className="trend text-emerald">Daily Goal Completed</span>
-                      </div>
-                      <div className="stat-icon-wrapper text-emerald">
-                        <CheckSquare size={24} />
-                      </div>
-                    </motion.div>
-
-                    <motion.div 
-                      variants={itemVariants} 
-                      className="glass-card stat-widget"
-                      whileHover={{ y: -5, boxShadow: "0 12px 28px rgba(16, 103, 217, 0.08)", borderColor: "rgba(16, 103, 217, 0.15)" }}
-                    >
-                      <div className="stat-info">
-                        <span className="label">Distractions Prevented</span>
-                        <span className="value">42 attempts</span>
-                        <span className="trend text-emerald">Saved ~1.5 hours today</span>
-                      </div>
-                      <div className="stat-icon-wrapper text-rose">
-                        <Shield size={24} />
-                      </div>
-                    </motion.div>
-                  </motion.div>
-
-                  {/* Time Distribution Area Chart */}
-                  <motion.div 
-                    className="glass-card"
-                    whileHover={{ y: -3, boxShadow: "0 10px 24px rgba(16, 103, 217, 0.06)", borderColor: "rgba(16, 103, 217, 0.12)" }}
-                  >
-                    <div className="chart-header">
-                      <h3>Time Distribution (Minutes)</h3>
-                      <span className="text-slate-500 text-xs font-bold uppercase tracking-widest">Live Activity Domain Feed</span>
-                    </div>
-                    <div style={{ height: '260px', width: '100%', marginTop: '16px', position: 'relative' }}>
-                      {stats.length > 0 ? (
-                        <ResponsiveContainer width="100%" height={260} minWidth={0}>
-                          <AreaChart data={stats.map(s => ({ name: s._id, Minutes: Math.round(s.totalDuration / 60) }))}>
-                            <defs>
-                              <linearGradient id="colorMinutes" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#1067d9" stopOpacity={0.4}/>
-                                <stop offset="95%" stopColor="#1067d9" stopOpacity={0}/>
-                              </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(0, 0, 0, 0.04)" vertical={false} />
-                            <XAxis dataKey="name" stroke="#86868b" fontSize={11} fontWeight={600} />
-                            <YAxis stroke="#86868b" fontSize={11} fontWeight={600} />
-                            <Tooltip 
-                              contentStyle={{ backgroundColor: '#ffffff', border: '1px solid rgba(0, 0, 0, 0.08)', borderRadius: '14px', color: '#1d1d1f' }}
-                              itemStyle={{ color: '#1d1d1f' }}
-                            />
-                            <Area type="monotone" dataKey="Minutes" stroke="#1067d9" strokeWidth={3} fillOpacity={1} fill="url(#colorMinutes)" />
-                          </AreaChart>
-                        </ResponsiveContainer>
-                      ) : (
-                        <>
-                          <div style={{ filter: 'blur(3px) opacity(0.3)', pointerEvents: 'none', height: '100%', width: '100%' }}>
-                            <ResponsiveContainer width="100%" height={260} minWidth={0}>
-                              <AreaChart data={[
-                                { name: 'chrome-extension-sm.vercel.app', Minutes: 29 },
-                                { name: 'www.w3schools.com', Minutes: 12 },
-                                { name: 'vercel.com', Minutes: 8 },
-                                { name: 'skycast-sm.vercel.app', Minutes: 4 },
-                                { name: 'www.google.com', Minutes: 2 }
-                              ]}>
-                                <defs>
-                                  <linearGradient id="colorMinutesMock" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#1067d9" stopOpacity={0.4}/>
-                                    <stop offset="95%" stopColor="#1067d9" stopOpacity={0}/>
-                                  </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0, 0, 0, 0.04)" vertical={false} />
-                                <XAxis dataKey="name" stroke="#86868b" fontSize={10} tick={false} />
-                                <YAxis stroke="#86868b" fontSize={11} />
-                                <Area type="monotone" dataKey="Minutes" stroke="#1067d9" strokeWidth={3} fillOpacity={1} fill="url(#colorMinutesMock)" />
-                              </AreaChart>
-                            </ResponsiveContainer>
-                          </div>
-                          <div style={{
-                            position: 'absolute',
-                            top: '50%',
-                            left: '50%',
-                            transform: 'translate(-50%, -50%)',
-                            background: 'rgba(255, 255, 255, 0.85)',
-                            backdropFilter: 'blur(10px)',
-                            border: '1px solid rgba(16, 103, 217, 0.15)',
-                            padding: '12px 20px',
-                            borderRadius: '16px',
-                            boxShadow: '0 8px 32px rgba(16, 103, 217, 0.06)',
-                            textAlign: 'center',
-                            maxWidth: '85%',
-                            zIndex: 10,
-                            pointerEvents: 'none'
-                          }}>
-                            <span style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-main)', display: 'block' }}>
-                              ⚡ Live Focus Trends Pending
-                            </span>
-                            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginTop: '2px' }}>
-                              Browse target domains with the Chrome Extension to see live charts
-                            </span>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </motion.div>
- 
-                  {/* Weekly Focus Hours Bar Chart */}
-                  <motion.div 
-                    className="glass-card"
-                    whileHover={{ y: -3, boxShadow: "0 10px 24px rgba(16, 103, 217, 0.06)", borderColor: "rgba(16, 103, 217, 0.12)" }}
-                  >
-                     <div className="chart-header">
-                       <h3>Weekly Activity Profile</h3>
-                       <span className="text-slate-500 text-xs font-bold uppercase tracking-widest">Rolling 7-Day Performance</span>
-                     </div>
-                    <div className="bar-chart-glow" style={{ height: '260px', width: '100%', marginTop: '16px' }}>
-                      <ResponsiveContainer width="100%" height={260} minWidth={0}>
-                        <BarChart data={weeklyData}>
-                          <defs>
-                            <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#1067d9" stopOpacity={0.8}/>
-                              <stop offset="100%" stopColor="#1067d9" stopOpacity={0.15}/>
-                            </linearGradient>
-                          </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(0, 0, 0, 0.04)" vertical={false} />
-                          <XAxis dataKey="day" stroke="#86868b" fontSize={11} fontWeight={600} />
-                          <YAxis stroke="#86868b" fontSize={11} fontWeight={600} unit="h" />
-                          <Tooltip 
-                            contentStyle={{ backgroundColor: '#ffffff', border: '1px solid rgba(0, 0, 0, 0.08)', borderRadius: '14px', color: '#1d1d1f' }}
-                            itemStyle={{ color: '#1d1d1f' }}
-                            formatter={(value) => [`${value} hours`, 'Focus Duration']}
-                          />
-                          <Bar dataKey="Hours" fill="url(#barGradient)" radius={[6, 6, 0, 0]} maxBarSize={45} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </motion.div>
-
-                </div>
-
-                {/* Right Column (1/3 width) */}
-                <div className="dashboard-right-column" style={{ flex: '1', minWidth: '280px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                  
-                  {/* Focus Score Gauge + Goal Progress Inside */}
-                  <motion.div 
-                    className="glass-card focus-score-card"
-                    whileHover={{ y: -3, boxShadow: "0 10px 24px rgba(16, 103, 217, 0.06)", borderColor: "rgba(16, 103, 217, 0.12)" }}
-                    style={{ minHeight: '330px' }}
-                  >
-                    <div className="chart-header w-full">
-                      <h3>Focus Flow Score</h3>
-                    </div>
-                    <div className="focus-score-container mt-2">
-                      <svg width="120" height="120" className="focus-score-svg">
-                        <defs>
-                          <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stopColor="#1067d9" />
-                            <stop offset="100%" stopColor="#00d2ff" />
-                          </linearGradient>
-                        </defs>
-                        {/* Background Ring */}
-                        <circle 
-                          cx="60" 
-                          cy="60" 
-                          r="50" 
-                          strokeWidth="8" 
-                          fill="transparent" 
-                          className="focus-score-bg-circle"
-                        />
-                        {/* Fill Ring */}
-                        <circle 
-                          cx="60" 
-                          cy="60" 
-                          r="50" 
-                          strokeWidth="8" 
-                          fill="transparent" 
-                          strokeDasharray={scoreCircumference}
-                          strokeDashoffset={scoreDashoffset}
-                          strokeLinecap="round"
-                          className="focus-score-fill-circle"
-                        />
-                      </svg>
-                      <div className="focus-score-text-wrapper">
-                        <span className="focus-score-value">{focusScore}</span>
-                        <span className="focus-score-label">Flow Index</span>
-                      </div>
-                    </div>
-                    <p className="focus-score-desc" style={{ marginBottom: '16px' }}>
-                      {focusScore >= 80 ? "Optimal Flow. Excellent concentration!" : focusScore >= 60 ? "Steady Focus. Nice steady momentum." : "Needs Attention. Take a deep breath."}
-                    </p>
-
-                    {/* Progress Bar inside Score Card to balance height alignment */}
-                    <div className="w-full flex flex-col gap-2 pt-4 border-t border-slate-100" style={{ borderTop: '1px solid var(--border)' }}>
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="font-semibold text-slate-500">Daily Target Progress</span>
-                        <span style={{ color: 'var(--primary)' }} className="font-bold">{Math.round(progressPercent)}%</span>
-                      </div>
-                      <div className="progress-bar" style={{ height: '8px' }}>
-                        <div className="progress" style={{ width: `${progressPercent}%` }}></div>
-                      </div>
-                    </div>
-                  </motion.div>
-
-                  {/* Category Breakdown Pie Chart */}
-                  <motion.div 
-                    className="glass-card flex flex-col justify-between"
-                    whileHover={{ y: -3, boxShadow: "0 10px 24px rgba(16, 103, 217, 0.06)", borderColor: "rgba(16, 103, 217, 0.12)" }}
-                    style={{ minHeight: '345px' }}
-                  >
-                    <div className="chart-header">
-                      <h3>Category Distribution</h3>
-                    </div>
+                  {/* Left Column (2/3 width) */}
+                  <div className="dashboard-left-column" style={{ flex: '2', minWidth: '320px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
                     
-                    <div className="category-chart-container" style={{ height: '130px', width: '100%' }}>
-                      {pieData.length > 0 ? (
-                        <>
-                          <ResponsiveContainer width="100%" height={130} minWidth={0}>
-                            <PieChart>
-                              <Pie
-                                data={pieData}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius={40}
-                                outerRadius={55}
-                                paddingAngle={4}
-                                dataKey="value"
-                              >
-                                {pieData.map((entry, index) => (
-                                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                ))}
-                              </Pie>
+                    {/* Time Distribution Area Chart */}
+                    <motion.div 
+                      className="glass-card"
+                      whileHover={{ y: -3, boxShadow: "0 10px 24px rgba(16, 103, 217, 0.06)", borderColor: "rgba(16, 103, 217, 0.12)" }}
+                      style={{ height: '360px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
+                    >
+                      <div className="chart-header">
+                        <h3>Time Distribution (Minutes)</h3>
+                        <span className="text-slate-500 text-xs font-bold uppercase tracking-widest">Live Activity Domain Feed</span>
+                      </div>
+                      <div style={{ height: '260px', width: '100%', position: 'relative' }}>
+                        {stats.length > 0 ? (
+                          <ResponsiveContainer width="100%" height={260} minWidth={0}>
+                            <AreaChart data={stats.map(s => ({ name: s._id, Minutes: Math.round(s.totalDuration / 60) }))}>
+                              <defs>
+                                <linearGradient id="colorMinutes" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="#1067d9" stopOpacity={0.4}/>
+                                  <stop offset="95%" stopColor="#1067d9" stopOpacity={0}/>
+                                </linearGradient>
+                              </defs>
+                              <CartesianGrid strokeDasharray="3 3" stroke="rgba(0, 0, 0, 0.04)" vertical={false} />
+                              <XAxis dataKey="name" stroke="#86868b" fontSize={11} fontWeight={600} />
+                              <YAxis stroke="#86868b" fontSize={11} fontWeight={600} />
                               <Tooltip 
                                 contentStyle={{ backgroundColor: '#ffffff', border: '1px solid rgba(0, 0, 0, 0.08)', borderRadius: '14px', color: '#1d1d1f' }}
                                 itemStyle={{ color: '#1d1d1f' }}
-                                formatter={(value) => {
-                                  const mins = Math.floor(value / 60);
-                                  const secs = value % 60;
-                                  return mins > 0 ? [`${mins}m ${secs}s`, 'Focus Time'] : [`${secs}s`, 'Focus Time'];
-                                }}
                               />
-                            </PieChart>
+                              <Area type="monotone" dataKey="Minutes" stroke="#1067d9" strokeWidth={3} fillOpacity={1} fill="url(#colorMinutes)" />
+                            </AreaChart>
                           </ResponsiveContainer>
-                          <div className="category-donut-center">
-                            <span className="category-donut-val">
-                              {totalTrackedMinutes >= 60 ? `${(totalTrackedMinutes / 60).toFixed(1)}h` : `${totalTrackedMinutes}m`}
-                            </span>
-                            <span className="category-donut-lbl">Flow Time</span>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <div style={{ filter: 'blur(3px) opacity(0.3)', pointerEvents: 'none', height: '100%', width: '100%' }}>
+                        ) : (
+                          <>
+                            <div style={{ filter: 'blur(3px) opacity(0.3)', pointerEvents: 'none', height: '100%', width: '100%' }}>
+                              <ResponsiveContainer width="100%" height={260} minWidth={0}>
+                                <AreaChart data={[
+                                  { name: 'chrome-extension-sm.vercel.app', Minutes: 29 },
+                                  { name: 'www.w3schools.com', Minutes: 12 },
+                                  { name: 'vercel.com', Minutes: 8 },
+                                  { name: 'skycast-sm.vercel.app', Minutes: 4 },
+                                  { name: 'www.google.com', Minutes: 2 }
+                                ]}>
+                                  <defs>
+                                    <linearGradient id="colorMinutesMock" x1="0" y1="0" x2="0" y2="1">
+                                      <stop offset="5%" stopColor="#1067d9" stopOpacity={0.4}/>
+                                      <stop offset="95%" stopColor="#1067d9" stopOpacity={0}/>
+                                    </linearGradient>
+                                  </defs>
+                                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0, 0, 0, 0.04)" vertical={false} />
+                                  <XAxis dataKey="name" stroke="#86868b" fontSize={10} tick={false} />
+                                  <YAxis stroke="#86868b" fontSize={11} />
+                                  <Area type="monotone" dataKey="Minutes" stroke="#1067d9" strokeWidth={3} fillOpacity={1} fill="url(#colorMinutesMock)" />
+                                </AreaChart>
+                              </ResponsiveContainer>
+                            </div>
+                            <div style={{
+                              position: 'absolute',
+                              top: '50%',
+                              left: '50%',
+                              transform: 'translate(-50%, -50%)',
+                              background: 'rgba(255, 255, 255, 0.85)',
+                              backdropFilter: 'blur(10px)',
+                              border: '1px solid rgba(16, 103, 217, 0.15)',
+                              padding: '12px 20px',
+                              borderRadius: '16px',
+                              boxShadow: '0 8px 32px rgba(16, 103, 217, 0.06)',
+                              textAlign: 'center',
+                              maxWidth: '85%',
+                              zIndex: 10,
+                              pointerEvents: 'none'
+                            }}>
+                              <span style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-main)', display: 'block' }}>
+                                ⚡ Live Focus Trends Pending
+                              </span>
+                              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginTop: '2px' }}>
+                                Browse target domains with the Chrome Extension to see live charts
+                              </span>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </motion.div>
+   
+                    {/* Weekly Focus Hours Bar Chart */}
+                    <motion.div 
+                      className="glass-card"
+                      whileHover={{ y: -3, boxShadow: "0 10px 24px rgba(16, 103, 217, 0.06)", borderColor: "rgba(16, 103, 217, 0.12)" }}
+                      style={{ height: '360px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
+                    >
+                       <div className="chart-header">
+                         <h3>Weekly Activity Profile</h3>
+                         <span className="text-slate-500 text-xs font-bold uppercase tracking-widest">Rolling 7-Day Performance</span>
+                       </div>
+                      <div className="bar-chart-glow" style={{ height: '260px', width: '100%' }}>
+                        <ResponsiveContainer width="100%" height={260} minWidth={0}>
+                          <BarChart data={weeklyData}>
+                            <defs>
+                              <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#1067d9" stopOpacity={0.8}/>
+                                <stop offset="100%" stopColor="#1067d9" stopOpacity={0.15}/>
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(0, 0, 0, 0.04)" vertical={false} />
+                            <XAxis dataKey="day" stroke="#86868b" fontSize={11} fontWeight={600} />
+                            <YAxis stroke="#86868b" fontSize={11} fontWeight={600} unit="h" />
+                            <Tooltip 
+                              contentStyle={{ backgroundColor: '#ffffff', border: '1px solid rgba(0, 0, 0, 0.08)', borderRadius: '14px', color: '#1d1d1f' }}
+                              itemStyle={{ color: '#1d1d1f' }}
+                              formatter={(value) => [`${value} hours`, 'Focus Duration']}
+                            />
+                            <Bar dataKey="Hours" fill="url(#barGradient)" radius={[6, 6, 0, 0]} maxBarSize={45} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </motion.div>
+  
+                  </div>
+  
+                  {/* Right Column (1/3 width) */}
+                  <div className="dashboard-right-column" style={{ flex: '1', minWidth: '280px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                    
+                    {/* Focus Score Gauge + Goal Progress Inside */}
+                    <motion.div 
+                      className="glass-card focus-score-card"
+                      whileHover={{ y: -3, boxShadow: "0 10px 24px rgba(16, 103, 217, 0.06)", borderColor: "rgba(16, 103, 217, 0.12)" }}
+                      style={{ height: '360px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
+                    >
+                      <div className="chart-header w-full">
+                        <h3>Focus Flow Score</h3>
+                      </div>
+                      <div className="focus-score-container mt-2">
+                        <svg width="120" height="120" className="focus-score-svg">
+                          <defs>
+                            <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                              <stop offset="0%" stopColor="#1067d9" />
+                              <stop offset="100%" stopColor="#00d2ff" />
+                            </linearGradient>
+                          </defs>
+                          {/* Background Ring */}
+                          <circle 
+                            cx="60" 
+                            cy="60" 
+                            r="50" 
+                            strokeWidth="8" 
+                            fill="transparent" 
+                            className="focus-score-bg-circle"
+                          />
+                          {/* Fill Ring */}
+                          <circle 
+                            cx="60" 
+                            cy="60" 
+                            r="50" 
+                            strokeWidth="8" 
+                            fill="transparent" 
+                            strokeDasharray={scoreCircumference}
+                            strokeDashoffset={scoreDashoffset}
+                            strokeLinecap="round"
+                            className="focus-score-fill-circle"
+                          />
+                        </svg>
+                        <div className="focus-score-text-wrapper">
+                          <span className="focus-score-value">{focusScore}</span>
+                          <span className="focus-score-label">Flow Index</span>
+                        </div>
+                      </div>
+                      <p className="focus-score-desc" style={{ margin: '8px 0' }}>
+                        {focusScore >= 80 ? "Optimal Flow. Excellent concentration!" : focusScore >= 60 ? "Steady Focus. Nice steady momentum." : "Needs Attention. Take a deep breath."}
+                      </p>
+  
+                      {/* Progress Bar inside Score Card to balance height alignment */}
+                      <div className="w-full flex flex-col gap-2 pt-3 border-t border-slate-100" style={{ borderTop: '1px solid var(--border)' }}>
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="font-semibold text-slate-500">Daily Target Progress</span>
+                          <span style={{ color: 'var(--primary)' }} className="font-bold">{Math.round(progressPercent)}%</span>
+                        </div>
+                        <div className="progress-bar" style={{ height: '8px' }}>
+                          <div className="progress" style={{ width: `${progressPercent}%` }}></div>
+                        </div>
+                      </div>
+                    </motion.div>
+  
+                    {/* Category Breakdown Pie Chart */}
+                    <motion.div 
+                      className="glass-card flex flex-col justify-between"
+                      whileHover={{ y: -3, boxShadow: "0 10px 24px rgba(16, 103, 217, 0.06)", borderColor: "rgba(16, 103, 217, 0.12)" }}
+                      style={{ height: '360px' }}
+                    >
+                      <div className="chart-header">
+                        <h3>Category Distribution</h3>
+                      </div>
+                      
+                      <div className="category-chart-container" style={{ height: '130px', width: '100%' }}>
+                        {pieData.length > 0 ? (
+                          <>
                             <ResponsiveContainer width="100%" height={130} minWidth={0}>
                               <PieChart>
                                 <Pie
-                                  data={[
-                                    { name: 'Mock1', value: 60 },
-                                    { name: 'Mock2', value: 30 },
-                                    { name: 'Mock3', value: 10 }
-                                  ]}
+                                  data={pieData}
                                   cx="50%"
                                   cy="50%"
                                   innerRadius={40}
@@ -1010,126 +974,168 @@ const App = () => {
                                   paddingAngle={4}
                                   dataKey="value"
                                 >
-                                  <Cell fill={COLORS[0]} />
-                                  <Cell fill={COLORS[1]} />
-                                  <Cell fill={COLORS[2]} />
+                                  {pieData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                  ))}
                                 </Pie>
+                                <Tooltip 
+                                  contentStyle={{ backgroundColor: '#ffffff', border: '1px solid rgba(0, 0, 0, 0.08)', borderRadius: '14px', color: '#1d1d1f' }}
+                                  itemStyle={{ color: '#1d1d1f' }}
+                                  formatter={(value) => {
+                                    const mins = Math.floor(value / 60);
+                                    const secs = value % 60;
+                                    return mins > 0 ? [`${mins}m ${secs}s`, 'Focus Time'] : [`${secs}s`, 'Focus Time'];
+                                  }}
+                                />
+                              </PieChart>
+                            </ResponsiveContainer>
+                            <div className="category-donut-center">
+                              <span className="category-donut-val">
+                                {totalTrackedMinutes >= 60 ? `${(totalTrackedMinutes / 60).toFixed(1)}h` : `${totalTrackedMinutes}m`}
+                              </span>
+                              <span className="category-donut-lbl">Flow Time</span>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div style={{ filter: 'blur(3px) opacity(0.3)', pointerEvents: 'none', height: '100%', width: '100%' }}>
+                              <ResponsiveContainer width="100%" height={130} minWidth={0}>
+                                <PieChart>
+                                  <Pie
+                                    data={[
+                                      { name: 'Mock1', value: 60 },
+                                      { name: 'Mock2', value: 30 },
+                                      { name: 'Mock3', value: 10 }
+                                    ]}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={40}
+                                    outerRadius={55}
+                                    paddingAngle={4}
+                                    dataKey="value"
+                                  >
+                                    <Cell fill={COLORS[0]} />
+                                    <Cell fill={COLORS[1]} />
+                                    <Cell fill={COLORS[2]} />
+                                  </Pie>
                               </PieChart>
                             </ResponsiveContainer>
                           </div>
                           <div className="category-donut-center" style={{ filter: 'blur(1px) opacity(0.5)' }}>
-                            <span className="category-donut-val">--</span>
-                            <span className="category-donut-lbl">No Stats</span>
-                          </div>
-                          <div style={{
-                            position: 'absolute',
-                            top: '50%',
-                            left: '50%',
-                            transform: 'translate(-50%, -50%)',
-                            background: 'rgba(255, 255, 255, 0.85)',
-                            backdropFilter: 'blur(8px)',
-                            border: '1px solid rgba(16, 103, 217, 0.12)',
-                            padding: '6px 12px',
-                            borderRadius: '10px',
-                            boxShadow: '0 4px 16px rgba(16, 103, 217, 0.04)',
-                            textAlign: 'center',
-                            maxWidth: '90%',
-                            zIndex: 10,
-                            pointerEvents: 'none'
-                          }}>
-                            <span style={{ fontSize: '0.65rem', fontWeight: '700', color: 'var(--text-main)' }}>
-                              📊 Pending Statistics
-                            </span>
-                          </div>
-                        </>
-                      )}
-                    </div>
-
-                    <div className="flex flex-col gap-2 mt-2 overflow-y-auto custom-scrollbar" style={{ maxHeight: '140px', paddingRight: '2px' }}>
-                      {(() => {
-                        const totalPieSecs = pieData.reduce((acc, curr) => acc + curr.value, 0) || 1;
-                        return pieData.map((entry, index) => {
-                          const percentage = Math.round((entry.value / totalPieSecs) * 100);
-                          const mins = Math.floor(entry.value / 60);
-                          const secs = entry.value % 60;
-                          const timeStr = mins > 0 ? `${mins}m` : `${secs}s`;
-                          const sliceColor = COLORS[index % COLORS.length];
-                          const faviconUrl = `https://www.google.com/s2/favicons?domain=${entry.name}&sz=32`;
-                          
-                          return (
-                            <div 
-                              key={index} 
-                              className="premium-category-item"
-                              title={entry.name}
-                            >
-                              <div 
-                                className="category-backdrop-progress" 
-                                style={{ 
-                                  width: `${percentage}%`, 
-                                  backgroundColor: sliceColor 
-                                }}
-                              />
-                              
-                              <div className="premium-category-item-content">
-                                <div className="category-item-favicon-wrapper">
-                                  <img 
-                                    src={faviconUrl} 
-                                    alt="" 
-                                    className="category-item-favicon"
-                                    onError={(e) => {
-                                      e.target.style.display = 'none';
-                                      e.target.parentNode.style.backgroundColor = sliceColor;
-                                    }}
-                                  />
-                                </div>
-                                <span className="category-item-name">{entry.name}</span>
-                              </div>
-                              
-                              <div className="premium-category-item-stats">
-                                <span 
-                                  className="category-item-time-badge" 
-                                  style={{ 
-                                    color: sliceColor, 
-                                    backgroundColor: `${sliceColor}12` 
-                                  }}
-                                >
-                                  {timeStr}
-                                </span>
-                              </div>
+                              <span className="category-donut-val">--</span>
+                              <span className="category-donut-lbl">No Stats</span>
                             </div>
-                          );
-                        });
-                      })()}
-                    </div>
-                  </motion.div>
-
-                  {/* Smart Insights Widget */}
-                  <motion.div 
-                    className="glass-card flex flex-col gap-3"
-                    whileHover={{ y: -3, boxShadow: "0 10px 24px rgba(16, 103, 217, 0.06)", borderColor: "rgba(16, 103, 217, 0.12)" }}
-                    style={{ minHeight: '190px' }}
-                  >
-                    <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider">
-                      <Sparkles size={14} /> Smart Insights
-                    </div>
-                    <div className="flex flex-col gap-2 text-xs text-slate-600 font-medium">
-                      <div className="flex items-start gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5"></span>
-                        <span>Daily focus efficiency is at <strong>{focusScore}%</strong>. Keep up this momentum!</span>
+                            <div style={{
+                              position: 'absolute',
+                              top: '50%',
+                              left: '50%',
+                              transform: 'translate(-50%, -50%)',
+                              background: 'rgba(255, 255, 255, 0.85)',
+                              backdropFilter: 'blur(8px)',
+                              border: '1px solid rgba(16, 103, 217, 0.12)',
+                              padding: '6px 12px',
+                              borderRadius: '10px',
+                              boxShadow: '0 4px 16px rgba(16, 103, 217, 0.04)',
+                              textAlign: 'center',
+                              maxWidth: '90%',
+                              zIndex: 10,
+                              pointerEvents: 'none'
+                            }}>
+                              <span style={{ fontSize: '0.65rem', fontWeight: '700', color: 'var(--text-main)' }}>
+                                📊 Pending Statistics
+                              </span>
+                            </div>
+                          </>
+                        )}
                       </div>
-                      <div className="flex items-start gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5"></span>
-                        <span>Blocked domains prevented <strong>12</strong> session distraction attempts.</span>
+  
+                      <div className="flex flex-col gap-2 mt-2 overflow-y-auto custom-scrollbar" style={{ maxHeight: '140px', paddingRight: '2px' }}>
+                        {(() => {
+                          const totalPieSecs = pieData.reduce((acc, curr) => acc + curr.value, 0) || 1;
+                          return pieData.map((entry, index) => {
+                            const percentage = Math.round((entry.value / totalPieSecs) * 100);
+                            const mins = Math.floor(entry.value / 60);
+                            const secs = entry.value % 60;
+                            const timeStr = mins > 0 ? `${mins}m` : `${secs}s`;
+                            const sliceColor = COLORS[index % COLORS.length];
+                            const faviconUrl = `https://www.google.com/s2/favicons?domain=${entry.name}&sz=32`;
+                            
+                            return (
+                              <div 
+                                key={index} 
+                                className="premium-category-item"
+                                title={entry.name}
+                              >
+                                <div 
+                                  className="category-backdrop-progress" 
+                                  style={{ 
+                                    width: `${percentage}%`, 
+                                    backgroundColor: sliceColor 
+                                  }}
+                                />
+                                
+                                <div className="premium-category-item-content">
+                                  <div className="category-item-favicon-wrapper">
+                                    <img 
+                                      src={faviconUrl} 
+                                      alt="" 
+                                      className="category-item-favicon"
+                                      onError={(e) => {
+                                        e.target.style.display = 'none';
+                                        e.target.parentNode.style.backgroundColor = sliceColor;
+                                      }}
+                                    />
+                                  </div>
+                                  <span className="category-item-name">{entry.name}</span>
+                                </div>
+                                
+                                <div className="premium-category-item-stats">
+                                  <span 
+                                    className="category-item-time-badge" 
+                                    style={{ 
+                                      color: sliceColor, 
+                                      backgroundColor: `${sliceColor}12` 
+                                    }}
+                                  >
+                                    {timeStr}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          });
+                        })()}
                       </div>
-                      <div className="flex items-start gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5"></span>
-                        <span>Your prime flow state occurred during study/coding blocks.</span>
-                      </div>
-                    </div>
-                  </motion.div>
-
+                    </motion.div>
+  
+                  </div>
+  
                 </div>
 
+                {/* Horizontal Insights Banner at the Bottom */}
+                <motion.div 
+                  className="insights-banner-full"
+                  whileHover={{ y: -2, boxShadow: "0 8px 24px rgba(16, 103, 217, 0.05)" }}
+                >
+                  <div className="insights-banner-title-box">
+                    <Sparkles size={16} className="text-primary animate-pulse" />
+                    <span>Smart Insights</span>
+                  </div>
+                  <div className="insights-banner-grid">
+                    <div className="insights-banner-item">
+                      <span className="insights-dot bg-blue-500"></span>
+                      <span>Daily focus efficiency is at <strong>{focusScore}%</strong>. Keep up this momentum!</span>
+                    </div>
+                    <div className="insights-banner-item">
+                      <span className="insights-dot bg-emerald-500"></span>
+                      <span>Blocked domains prevented <strong>12</strong> session distraction attempts.</span>
+                    </div>
+                    <div className="insights-banner-item">
+                      <span className="insights-dot bg-amber-500"></span>
+                      <span>Your prime flow state occurred during study/coding blocks.</span>
+                    </div>
+                  </div>
+                </motion.div>
+  
               </div>
             )}
 

@@ -90,12 +90,41 @@ async function syncActivity(activity) {
 
 // Declarative Net Request Dynamic Blocking Rules
 async function updateBlockingRules() {
+  let blockedSites = [];
+  let focusMode = false;
+  let fetchedSuccessfully = false;
+
   try {
     const response = await fetch(`${API_URL}/preferences/${USER_ID}`);
-    const data = await response.json();
-    const blockedSites = data.blockedSites || [];
-    const focusMode = data.focusMode || false;
-    
+    if (response.ok) {
+      const data = await response.json();
+      blockedSites = data.blockedSites || [];
+      focusMode = data.focusMode || false;
+      fetchedSuccessfully = true;
+
+      // Cache rules locally
+      await new Promise((resolve) => {
+        chrome.storage.local.set({
+          cached_blocked_sites: blockedSites,
+          cached_focus_mode: focusMode
+        }, resolve);
+      });
+    } else {
+      throw new Error(`Server returned status ${response.status}`);
+    }
+  } catch (e) {
+    console.warn('Network error: Failed to fetch blocking rules from server. Falling back to cache.', e.message);
+    // Fallback to cache
+    await new Promise((resolve) => {
+      chrome.storage.local.get(['cached_blocked_sites', 'cached_focus_mode'], (items) => {
+        blockedSites = items.cached_blocked_sites || [];
+        focusMode = items.cached_focus_mode || false;
+        resolve();
+      });
+    });
+  }
+
+  try {
     const oldRules = await chrome.declarativeNetRequest.getDynamicRules();
     const oldRuleIds = oldRules.map(r => r.id);
 
@@ -121,17 +150,17 @@ async function updateBlockingRules() {
         removeRuleIds: oldRuleIds,
         addRules: rules
       });
-      console.log('Focus Mode Active: Blocking rules updated with redirection');
+      console.log(`Focus Mode Active: Blocking rules updated with redirection (${fetchedSuccessfully ? 'from server' : 'from cache'})`);
     } else {
       // Clear rules when Focus Mode is OFF
       await chrome.declarativeNetRequest.updateDynamicRules({
         removeRuleIds: oldRuleIds,
         addRules: []
       });
-      console.log('Focus Mode Inactive: Blocking rules cleared');
+      console.log(`Focus Mode Inactive: Blocking rules cleared (${fetchedSuccessfully ? 'from server' : 'from cache'})`);
     }
   } catch (e) {
-    console.error('Failed to update blocking rules:', e);
+    console.error('Failed to apply declarative blocking rules:', e);
   }
 }
 
@@ -282,9 +311,28 @@ async function toggleFocusModeAPI(enable) {
       })
     });
     
+    // Cache focus mode change immediately
+    await new Promise((resolve) => {
+      chrome.storage.local.set({
+        cached_blocked_sites: pref.blockedSites || [],
+        cached_focus_mode: enable
+      }, resolve);
+    });
+
     updateBlockingRules();
   } catch (e) {
-    console.error('Failed to toggle focus mode via Pomodoro:', e);
+    console.warn('Failed to toggle focus mode via server. Attempting offline fallback:', e.message);
+    try {
+      // Local fallback for offline focus mode toggling
+      await new Promise((resolve) => {
+        chrome.storage.local.set({
+          cached_focus_mode: enable
+        }, resolve);
+      });
+      updateBlockingRules();
+    } catch (localErr) {
+      console.error('Local Pomodoro fallback toggle failed:', localErr);
+    }
   }
 }
 
