@@ -208,10 +208,8 @@ const App = () => {
       });
       setPreferences(res.data);
       
-      // If extension is loaded, tell it to update DNR dynamic rules immediately
-      if (window.chrome && window.chrome.runtime) {
-        window.chrome.runtime.sendMessage({ action: 'REFRESH_BLOCKING_RULES' });
-      }
+      // Tell extension to update DNR dynamic rules immediately via postMessage bridge
+      window.postMessage({ action: 'FOCUSFLOW_REFRESH_BLOCKING_RULES' }, '*');
     } catch (err) {
       console.error(err);
     }
@@ -301,10 +299,8 @@ const App = () => {
       setPreferences(res.data);
       setNewBlockedSite('');
       
-      // Update extension rules
-      if (window.chrome && window.chrome.runtime) {
-        window.chrome.runtime.sendMessage({ action: 'REFRESH_BLOCKING_RULES' });
-      }
+      // Update extension rules via postMessage bridge
+      window.postMessage({ action: 'FOCUSFLOW_REFRESH_BLOCKING_RULES' }, '*');
     } catch (err) {
       console.error(err);
     }
@@ -319,10 +315,8 @@ const App = () => {
       });
       setPreferences(res.data);
       
-      // Update extension rules
-      if (window.chrome && window.chrome.runtime) {
-        window.chrome.runtime.sendMessage({ action: 'REFRESH_BLOCKING_RULES' });
-      }
+      // Update extension rules via postMessage bridge
+      window.postMessage({ action: 'FOCUSFLOW_REFRESH_BLOCKING_RULES' }, '*');
     } catch (err) {
       console.error(err);
     }

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+/* Outfit font is loaded via link tag in blocked.html to avoid CSP issues with @import */
 
 :root {
   --primary: #1067d9; /* Royal Blue */
@@ -20,7 +20,7 @@
 body {
   background-color: var(--bg-dark);
   color: var(--text-main);
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   min-height: 100vh;
   display: flex;
   justify-content: center;

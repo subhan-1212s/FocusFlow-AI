@@ -330,6 +330,10 @@ function handleIframeMessages(e) {
   else if (e.data && e.data.action === 'FOCUSFLOW_SYNC_USER') {
     safeSendMessage({ action: 'SYNC_USER', userId: e.data.userId });
   }
+  
+  else if (e.data && e.data.action === 'FOCUSFLOW_REFRESH_BLOCKING_RULES') {
+    safeSendMessage({ action: 'REFRESH_BLOCKING_RULES' });
+  }
 }
 
 // Sync user and api_url from local storage changes

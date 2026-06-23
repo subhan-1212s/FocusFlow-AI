@@ -31,6 +31,9 @@
       "path": "rules.json"
     }]
   },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com;"
+  },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],

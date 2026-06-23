@@ -2,11 +2,26 @@ let API_URL = 'https://chrome-extension-ts0n.onrender.com/api';
 let USER_ID = 'user_demo@example.com';
 let DASHBOARD_URL = 'http://localhost:5173'; // Default fallback
 
-chrome.storage.local.get(['user_id', 'api_url', 'dashboard_url'], (items) => {
-  if (items.user_id) USER_ID = items.user_id;
-  if (items.api_url) API_URL = items.api_url;
-  if (items.dashboard_url) DASHBOARD_URL = items.dashboard_url;
-});
+function isExtensionValid() {
+  try {
+    return typeof chrome !== 'undefined' && chrome.runtime && !!chrome.runtime.id;
+  } catch (e) {
+    return false;
+  }
+}
+
+if (isExtensionValid()) {
+  try {
+    chrome.storage.local.get(['user_id', 'api_url', 'dashboard_url'], (items) => {
+      if (chrome.runtime.lastError) return;
+      if (items.user_id) USER_ID = items.user_id;
+      if (items.api_url) API_URL = items.api_url;
+      if (items.dashboard_url) DASHBOARD_URL = items.dashboard_url;
+    });
+  } catch (e) {
+    console.warn('Extension context unavailable:', e.message);
+  }
+}
 
 const QUOTES = [
   { text: "Concentrate all your thoughts upon the work at hand. The sun's rays do not burn until brought to a focus.", author: "Alexander Graham Bell" },
@@ -20,9 +35,14 @@ const QUOTES = [
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
-  chrome.storage.local.get('user_id', (items) => {
-    if (items.user_id) USER_ID = items.user_id;
-  });
+  if (isExtensionValid()) {
+    try {
+      chrome.storage.local.get('user_id', (items) => {
+        if (chrome.runtime.lastError) return;
+        if (items.user_id) USER_ID = items.user_id;
+      });
+    } catch (e) { /* ignore */ }
+  }
   // Set Random Quote
   setRandomQuote();
   
@@ -60,25 +80,38 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         // Notify background worker to refresh rules immediately
-        chrome.runtime.sendMessage({ action: 'REFRESH_BLOCKING_RULES' }, () => {
-          // Retrieve originally blocked URL for this tab and redirect back to it
-          chrome.tabs.getCurrent((tab) => {
-            if (tab) {
-              chrome.storage.local.get(`lastUrl_${tab.id}`, (items) => {
-                const originalUrl = items[`lastUrl_${tab.id}`];
-                if (originalUrl) {
-                  window.location.href = originalUrl;
+        if (isExtensionValid()) {
+          try {
+            chrome.runtime.sendMessage({ action: 'REFRESH_BLOCKING_RULES' }, () => {
+              if (chrome.runtime.lastError) {
+                window.location.href = DASHBOARD_URL;
+                return;
+              }
+              // Retrieve originally blocked URL for this tab and redirect back to it
+              chrome.tabs.getCurrent((tab) => {
+                if (tab) {
+                  chrome.storage.local.get(`lastUrl_${tab.id}`, (items) => {
+                    const originalUrl = items[`lastUrl_${tab.id}`];
+                    if (originalUrl) {
+                      window.location.href = originalUrl;
+                    } else {
+                      window.location.href = DASHBOARD_URL;
+                    }
+                  });
                 } else {
                   window.location.href = DASHBOARD_URL;
                 }
               });
-            } else {
-              window.location.href = DASHBOARD_URL;
-            }
-          });
-        });
+            });
+          } catch (e) {
+            window.location.href = DASHBOARD_URL;
+          }
+        } else {
+          window.location.href = DASHBOARD_URL;
+        }
       } catch (e) {
         console.error('Failed to disable Focus Mode:', e);
+        window.location.href = DASHBOARD_URL;
       }
     }
   });
@@ -118,47 +151,58 @@ function runBreathingGuide() {
 }
 
 function syncTimer() {
-  chrome.runtime.sendMessage({ action: 'GET_POMODORO_STATE' }, (response) => {
-    if (!response) return;
+  if (!isExtensionValid()) return;
+  try {
+    chrome.runtime.sendMessage({ action: 'GET_POMODORO_STATE' }, (response) => {
+      if (chrome.runtime.lastError || !response) return;
 
-    const { minutes, seconds, phase } = response;
-    const formattedMinutes = String(minutes).padStart(2, '0');
-    const formattedSeconds = String(seconds).padStart(2, '0');
-    
-    document.getElementById('timer-display').innerHTML = `
-      <div class="time-block">
-        <span class="time-number">${formattedMinutes}</span>
-        <span class="time-unit">min</span>
-      </div>
-      <div class="time-colon">:</div>
-      <div class="time-block">
-        <span class="time-number">${formattedSeconds}</span>
-        <span class="time-unit">sec</span>
-      </div>
-    `;
-    
-    const label = document.getElementById('timer-phase');
-    if (phase === 'break') {
-      label.innerText = 'REST & RECHARGE CYCLE';
-      label.style.color = '#10b981'; // Emerald break
-    } else {
-      label.innerText = 'FOCUS SESSION TIMEOUT';
-      label.style.color = '#6366f1'; // Indigo focus
-    }
-  });
+      const { minutes, seconds, phase } = response;
+      const formattedMinutes = String(minutes).padStart(2, '0');
+      const formattedSeconds = String(seconds).padStart(2, '0');
+      
+      document.getElementById('timer-display').innerHTML = `
+        <div class="time-block">
+          <span class="time-number">${formattedMinutes}</span>
+          <span class="time-unit">min</span>
+        </div>
+        <div class="time-colon">:</div>
+        <div class="time-block">
+          <span class="time-number">${formattedSeconds}</span>
+          <span class="time-unit">sec</span>
+        </div>
+      `;
+      
+      const label = document.getElementById('timer-phase');
+      if (phase === 'break') {
+        label.innerText = 'REST & RECHARGE CYCLE';
+        label.style.color = '#10b981'; // Emerald break
+      } else {
+        label.innerText = 'FOCUS SESSION TIMEOUT';
+        label.style.color = '#6366f1'; // Indigo focus
+      }
+    });
+  } catch (e) {
+    // Extension context invalidated — stop polling
+  }
 }
 
 // Sync user, api_url, and dashboard_url from storage changes while blocked page is open
-chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === 'local') {
-    if (changes.user_id) {
-      USER_ID = changes.user_id.newValue || 'user_demo@example.com';
-    }
-    if (changes.api_url) {
-      API_URL = changes.api_url.newValue || 'https://chrome-extension-ts0n.onrender.com/api';
-    }
-    if (changes.dashboard_url) {
-      DASHBOARD_URL = changes.dashboard_url.newValue || 'http://localhost:5173';
-    }
+if (isExtensionValid()) {
+  try {
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area === 'local') {
+        if (changes.user_id) {
+          USER_ID = changes.user_id.newValue || 'user_demo@example.com';
+        }
+        if (changes.api_url) {
+          API_URL = changes.api_url.newValue || 'https://chrome-extension-ts0n.onrender.com/api';
+        }
+        if (changes.dashboard_url) {
+          DASHBOARD_URL = changes.dashboard_url.newValue || 'http://localhost:5173';
+        }
+      }
+    });
+  } catch (e) {
+    // Extension context invalidated
   }
-});
+}
