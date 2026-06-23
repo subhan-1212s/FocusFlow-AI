@@ -493,18 +493,18 @@ const App = () => {
 
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-900" style={{ background: 'linear-gradient(180deg, #f5f5f7 0%, #ffffff 100%)' }}>
       <div className="flex flex-col items-center gap-4">
         <div className="spinner"></div>
-        <div className="animate-pulse text-2xl font-bold tracking-tight">FocusFlow <span className="text-primary text-gradient">AI</span></div>
-        <p className="text-slate-500 text-sm">Harmonising your workflow...</p>
+        <div className="animate-pulse text-2xl font-bold tracking-tight">FocusFlow <span className="text-primary">AI</span></div>
+        <p className="text-slate-600 text-sm">Harmonising your workflow...</p>
       </div>
     </div>
   );
 
   if (currentPath === '/login') {
     return (
-      <div className="auth-layout min-h-screen flex items-center justify-center bg-slate-950 text-white relative">
+      <div className="auth-layout min-h-screen flex items-center justify-center bg-slate-50 text-slate-900 relative">
         <div className="auth-overlay"></div>
         <motion.div 
           className="glass-card auth-card"
@@ -641,7 +641,7 @@ const App = () => {
             <div className="flex items-center gap-2.5 w-full">
               <div className="avatar">{userId.substring(0, 2).toUpperCase()}</div>
               <div className="profile-info truncate" style={{ maxWidth: '140px' }}>
-                <span className="profile-name truncate font-bold text-slate-200" title={userId}>{userId.split('@')[0]}</span>
+                <span className="profile-name truncate font-bold text-slate-800" title={userId}>{userId.split('@')[0]}</span>
                 <span className="profile-role">Workspace User</span>
               </div>
             </div>

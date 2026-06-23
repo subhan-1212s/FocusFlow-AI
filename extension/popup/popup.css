@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap');
 
 :root {
   --primary: #1067d9; /* Royal Blue */
@@ -7,7 +7,7 @@
   --bg-dark: #f5f5f7;
   --card-bg: #ffffff;
   --text-main: #1d1d1f;
-  --text-muted: #86868b;
+  --text-muted: #5f6368; /* Google Grey Text */
   --emerald: #2e7d32;
   --emerald-glow: rgba(46, 125, 50, 0.15);
   --rose: #d32f2f;
@@ -25,7 +25,7 @@ body {
   width: 340px;
   background-color: var(--bg-dark);
   color: var(--text-main);
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Google Sans', 'Roboto', 'Outfit', Arial, sans-serif;
   overflow: hidden;
 }
 
