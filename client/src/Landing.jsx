@@ -14,41 +14,14 @@ const Landing = ({ onNavigate, isAuthenticated }) => {
     const target = document.getElementById(id);
     if (target) {
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      
-      const interrupt = () => {
-        window.scrollTo(window.scrollX, window.scrollY);
-        window.removeEventListener('wheel', interrupt);
-        window.removeEventListener('touchmove', interrupt);
-      };
-      
-      window.addEventListener('wheel', interrupt, { passive: true });
-      window.addEventListener('touchmove', interrupt, { passive: true });
-      
-      setTimeout(() => {
-        window.removeEventListener('wheel', interrupt);
-        window.removeEventListener('touchmove', interrupt);
-      }, 2000);
     }
   };
 
   const handleScrollToTop = (e) => {
     e.preventDefault();
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    
-    const interrupt = () => {
-      window.scrollTo(window.scrollX, window.scrollY);
-      window.removeEventListener('wheel', interrupt);
-      window.removeEventListener('touchmove', interrupt);
-    };
-    
-    window.addEventListener('wheel', interrupt, { passive: true });
-    window.addEventListener('touchmove', interrupt, { passive: true });
-    
-    setTimeout(() => {
-      window.removeEventListener('wheel', interrupt);
-      window.removeEventListener('touchmove', interrupt);
-    }, 2000);
   };
+
 
   const containerVariants = {
     hidden: { opacity: 0 },
