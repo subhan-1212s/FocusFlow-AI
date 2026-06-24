@@ -331,6 +331,10 @@ function handleIframeMessages(e) {
     safeSendMessage({ action: 'SYNC_USER', userId: e.data.userId });
   }
   
+  else if (e.data && e.data.action === 'FOCUSFLOW_SYNC_GEMINI_KEY') {
+    safeSetStorage({ gemini_key: e.data.geminiKey });
+  }
+  
   else if (e.data && e.data.action === 'FOCUSFLOW_REFRESH_BLOCKING_RULES') {
     safeSendMessage({ action: 'REFRESH_BLOCKING_RULES' });
   }

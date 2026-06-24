@@ -71,6 +71,7 @@ const App = () => {
   const [noteSearch, setNoteSearch] = useState('');
   const [newBlockedSite, setNewBlockedSite] = useState('');
   const [newDailyGoal, setNewDailyGoal] = useState(480);
+  const [geminiKey, setGeminiKey] = useState(localStorage.getItem('focusflow_gemini_key') || '');
 
   // Sync state
   const [saveWorkspaceName, setSaveWorkspaceName] = useState('');
@@ -106,6 +107,15 @@ const App = () => {
         action: 'FOCUSFLOW_SYNC_USER', 
         userId: userId 
       }, '*');
+      
+      // Sync stored Gemini key on startup
+      const storedKey = localStorage.getItem('focusflow_gemini_key') || '';
+      if (storedKey) {
+        window.postMessage({
+          action: 'FOCUSFLOW_SYNC_GEMINI_KEY',
+          geminiKey: storedKey
+        }, '*');
+      }
     }
   }, [userId]);
 
@@ -333,6 +343,20 @@ const App = () => {
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const handleSaveGeminiKey = (e) => {
+    e.preventDefault();
+    const cleanKey = geminiKey.trim();
+    localStorage.setItem('focusflow_gemini_key', cleanKey);
+    
+    // Sync with extension content script
+    window.postMessage({
+      action: 'FOCUSFLOW_SYNC_GEMINI_KEY',
+      geminiKey: cleanKey
+    }, '*');
+    
+    alert('Gemini API Key successfully saved and synchronized with Chrome Extension!');
   };
 
   // Workspace restore
@@ -1463,7 +1487,28 @@ const App = () => {
                   </div>
                 </div>
 
-
+                {/* 5c. Gemini AI Credentials */}
+                <div className="glass-card settings-group">
+                  <div className="flex flex-col gap-1">
+                    <h3 className="text-base font-bold">Gemini AI Assistant Key</h3>
+                    <p className="text-xs text-slate-500">Configure your personal Google AI Studio API Key to unlock real-time page summaries and coding chat features.</p>
+                  </div>
+                  <form onSubmit={handleSaveGeminiKey} className="settings-row flex-wrap gap-4">
+                    <div className="flex-1 min-w-[280px]">
+                      <input 
+                        type="password" 
+                        className="input-field" 
+                        placeholder="Enter API Key (AIzaSy...)" 
+                        value={geminiKey}
+                        onChange={(e) => setGeminiKey(e.target.value)}
+                      />
+                      <p className="text-[10px] text-slate-400 mt-1">
+                        Grab a free API key from <a href="https://aistudio.google.com" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>Google AI Studio</a>. Keys are stored locally in your browser context.
+                      </p>
+                    </div>
+                    <button type="submit" className="btn btn-primary">Save Key</button>
+                  </form>
+                </div>
 
               </div>
             )}

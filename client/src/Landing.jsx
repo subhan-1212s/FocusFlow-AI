@@ -55,7 +55,7 @@ const Landing = ({ onNavigate, isAuthenticated }) => {
       {/* Header / Navbar */}
       <header className="landing-navbar">
         <div className="landing-nav-container">
-          <div className="landing-logo-group">
+          <div className="landing-logo-group" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             <div className="landing-logo-box">
               <Sparkles size={16} />
             </div>
@@ -555,7 +555,7 @@ const Landing = ({ onNavigate, isAuthenticated }) => {
       {/* Footer */}
       <footer className="landing-footer">
         <div className="footer-max-width">
-          <div className="landing-logo-group">
+          <div className="landing-logo-group" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             <div className="landing-logo-box">
               <Sparkles size={16} />
             </div>
