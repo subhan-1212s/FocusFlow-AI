@@ -9,6 +9,47 @@ const Landing = ({ onNavigate, isAuthenticated }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeFaq, setActiveFaq] = useState(null);
 
+  const handleScrollTo = (e, id) => {
+    e.preventDefault();
+    const target = document.getElementById(id);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      
+      const interrupt = () => {
+        window.scrollTo(window.scrollX, window.scrollY);
+        window.removeEventListener('wheel', interrupt);
+        window.removeEventListener('touchmove', interrupt);
+      };
+      
+      window.addEventListener('wheel', interrupt, { passive: true });
+      window.addEventListener('touchmove', interrupt, { passive: true });
+      
+      setTimeout(() => {
+        window.removeEventListener('wheel', interrupt);
+        window.removeEventListener('touchmove', interrupt);
+      }, 2000);
+    }
+  };
+
+  const handleScrollToTop = (e) => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    const interrupt = () => {
+      window.scrollTo(window.scrollX, window.scrollY);
+      window.removeEventListener('wheel', interrupt);
+      window.removeEventListener('touchmove', interrupt);
+    };
+    
+    window.addEventListener('wheel', interrupt, { passive: true });
+    window.addEventListener('touchmove', interrupt, { passive: true });
+    
+    setTimeout(() => {
+      window.removeEventListener('wheel', interrupt);
+      window.removeEventListener('touchmove', interrupt);
+    }, 2000);
+  };
+
   const containerVariants = {
     hidden: { opacity: 0 },
     show: {
@@ -55,7 +96,7 @@ const Landing = ({ onNavigate, isAuthenticated }) => {
       {/* Header / Navbar */}
       <header className="landing-navbar">
         <div className="landing-nav-container">
-          <div className="landing-logo-group" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+          <div className="landing-logo-group" onClick={handleScrollToTop}>
             <div className="landing-logo-box">
               <Sparkles size={16} />
             </div>
@@ -66,9 +107,9 @@ const Landing = ({ onNavigate, isAuthenticated }) => {
 
           {/* Desktop Nav Links */}
           <nav className="landing-nav-links">
-            <a href="#features" className="landing-nav-link">Features</a>
-            <a href="#install" className="landing-nav-link">Install Extension</a>
-            <a href="#faq" className="landing-nav-link">FAQ</a>
+            <a href="#features" className="landing-nav-link" onClick={(e) => handleScrollTo(e, 'features')}>Features</a>
+            <a href="#install" className="landing-nav-link" onClick={(e) => handleScrollTo(e, 'install')}>Install Extension</a>
+            <a href="#faq" className="landing-nav-link" onClick={(e) => handleScrollTo(e, 'faq')}>FAQ</a>
             <a href="https://github.com/subhan-1212s/Chrome-Extension" target="_blank" rel="noopener noreferrer" className="landing-nav-link flex-link">
               GitHub <ExternalLink size={12} />
             </a>
@@ -104,9 +145,9 @@ const Landing = ({ onNavigate, isAuthenticated }) => {
               className="landing-mobile-menu"
             >
               <div className="landing-mobile-menu-inner">
-                <a href="#features" onClick={() => setMobileMenuOpen(false)} className="mobile-nav-link">Features</a>
-                <a href="#install" onClick={() => setMobileMenuOpen(false)} className="mobile-nav-link">Install Extension</a>
-                <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="mobile-nav-link">FAQ</a>
+                <a href="#features" onClick={(e) => { setMobileMenuOpen(false); handleScrollTo(e, 'features'); }} className="mobile-nav-link">Features</a>
+                <a href="#install" onClick={(e) => { setMobileMenuOpen(false); handleScrollTo(e, 'install'); }} className="mobile-nav-link">Install Extension</a>
+                <a href="#faq" onClick={(e) => { setMobileMenuOpen(false); handleScrollTo(e, 'faq'); }} className="mobile-nav-link">FAQ</a>
                 <a href="https://github.com/subhan-1212s/Chrome-Extension" target="_blank" rel="noopener noreferrer" className="mobile-nav-link flex-link">
                   GitHub <ExternalLink size={12} />
                 </a>
@@ -154,7 +195,7 @@ const Landing = ({ onNavigate, isAuthenticated }) => {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="landing-hero-ctas"
         >
-          <a href="#install" className="btn btn-primary py-3-5 px-8">
+          <a href="#install" className="btn btn-primary py-3-5 px-8" onClick={(e) => handleScrollTo(e, 'install')}>
             <Download size={18} />
             Install Extension
           </a>
@@ -555,7 +596,7 @@ const Landing = ({ onNavigate, isAuthenticated }) => {
       {/* Footer */}
       <footer className="landing-footer">
         <div className="footer-max-width">
-          <div className="landing-logo-group" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+          <div className="landing-logo-group" onClick={handleScrollToTop}>
             <div className="landing-logo-box">
               <Sparkles size={16} />
             </div>
@@ -565,8 +606,8 @@ const Landing = ({ onNavigate, isAuthenticated }) => {
           </div>
           <p className="footer-copyright">© {new Date().getFullYear()} FocusFlow AI. MIT Licensed. Crafted with premium design aesthetics.</p>
           <div className="footer-links">
-            <a href="#features" className="footer-link">Features</a>
-            <a href="#install" className="footer-link">Install</a>
+            <a href="#features" className="footer-link" onClick={(e) => handleScrollTo(e, 'features')}>Features</a>
+            <a href="#install" className="footer-link" onClick={(e) => handleScrollTo(e, 'install')}>Install</a>
             <a href="https://github.com/subhan-1212s/Chrome-Extension" target="_blank" rel="noopener noreferrer" className="footer-link">GitHub</a>
           </div>
         </div>
