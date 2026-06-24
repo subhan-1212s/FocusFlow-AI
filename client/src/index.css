@@ -1415,7 +1415,7 @@ input:checked + .slider:before {
 }
 
 .landing-glow-3 {
-  bottom: -10%;
+  bottom: 0;
   right: -10%;
   width: 700px;
   height: 700px;
@@ -2373,6 +2373,7 @@ input:checked + .slider:before {
 
 /* Footer Styles */
 .landing-footer {
+  margin-top: auto;
   padding: 32px 24px;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
   background: #ffffff;
